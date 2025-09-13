@@ -153,8 +153,16 @@ export default function Chat() {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.95;
-      utterance.pitch = 1.05;
+      utterance.pitch = 1.1;
       utterance.volume = 0.85;
+      const voices = speechSynthesis.getVoices();
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || "").toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const byLang = voices.filter((v) => v.lang === (localStorage.getItem("vaani.settings.lang") || "en-US"));
+      const pick = byLang.find(femalePreferred) || voices.find(femalePreferred) || byLang[0] || voices[0];
+      if (pick) utterance.voice = pick;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -443,95 +451,91 @@ export default function Chat() {
                   )}
                 >
                   {m.content}
-                  <div
-                    className={cn(
-                      "mt-1 flex items-center gap-2",
-                      m.type === "user" ? "justify-end" : "justify-start",
-                    )}
-                  >
-                    {m.type === "assistant" ? (
-                      <>
-                        <button
-                          title="Like"
-                          aria-label="Like"
-                          onClick={() => {
-                            setConversations((prev) =>
-                              prev.map((x) =>
-                                x.id === m.id
-                                  ? {
-                                      ...x,
-                                      reactions: {
-                                        thumbsUp: !x.reactions?.thumbsUp,
-                                        thumbsDown: false,
-                                      },
-                                    }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Dislike"
-                          aria-label="Dislike"
-                          onClick={() => {
-                            setConversations((prev) =>
-                              prev.map((x) =>
-                                x.id === m.id
-                                  ? {
-                                      ...x,
-                                      reactions: {
-                                        thumbsDown: !x.reactions?.thumbsDown,
-                                        thumbsUp: false,
-                                      },
-                                    }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Copy response"
-                          aria-label="Copy response"
-                          onClick={() =>
-                            navigator.clipboard.writeText(m.content)
-                          }
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <CopyIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          title="Edit query"
-                          aria-label="Edit query"
-                          onClick={() => {
-                            setQuery(m.content);
-                            inputRef.current?.focus();
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Copy query"
-                          aria-label="Copy query"
-                          onClick={() =>
-                            navigator.clipboard.writeText(m.content)
-                          }
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <CopyIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                </div>
+                <div
+                  className={cn(
+                    "mt-1 flex items-center gap-2 px-1",
+                    m.type === "user" ? "justify-end" : "justify-start",
+                  )}
+                >
+                  {m.type === "assistant" ? (
+                    <>
+                      <button
+                        title="Like"
+                        aria-label="Like"
+                        onClick={() => {
+                          setConversations((prev) =>
+                            prev.map((x) =>
+                              x.id === m.id
+                                ? {
+                                    ...x,
+                                    reactions: {
+                                      thumbsUp: !x.reactions?.thumbsUp,
+                                      thumbsDown: false,
+                                    },
+                                  }
+                                : x,
+                            ),
+                          );
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        title="Dislike"
+                        aria-label="Dislike"
+                        onClick={() => {
+                          setConversations((prev) =>
+                            prev.map((x) =>
+                              x.id === m.id
+                                ? {
+                                    ...x,
+                                    reactions: {
+                                      thumbsDown: !x.reactions?.thumbsDown,
+                                      thumbsUp: false,
+                                    },
+                                  }
+                                : x,
+                            ),
+                          );
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <ThumbsDown className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        title="Copy response"
+                        aria-label="Copy response"
+                        onClick={() => navigator.clipboard.writeText(m.content)}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <CopyIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        title="Edit query"
+                        aria-label="Edit query"
+                        onClick={() => {
+                          setQuery(m.content);
+                          inputRef.current?.focus();
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        title="Copy query"
+                        aria-label="Copy query"
+                        onClick={() => navigator.clipboard.writeText(m.content)}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <CopyIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

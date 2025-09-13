@@ -181,12 +181,40 @@ export default function LeftSidebar({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
-            <h4 className="text-sm font-medium text-foreground truncate pr-2 max-w-[14rem]">
+            <h4 className="text-sm font-medium text-foreground pr-2 break-words whitespace-normal leading-snug">
               {chat.title}
             </h4>
             <div className="flex items-center space-x-1 flex-shrink-0">
               {chat.isPinned && <Pin className="h-3 w-3 text-primary" />}
               {chat.isStarred && <Star className="h-3 w-3 text-yellow-500" />}
+              <button
+                aria-label="Rename chat"
+                title="Rename"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newTitle = prompt("Rename chat", chat.title)?.trim();
+                  if (newTitle) {
+                    try {
+                      const raw = localStorage.getItem("vaani.chats");
+                      const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                      const idx = arr.findIndex((c: any) => c.id === chat.id);
+                      if (idx >= 0) {
+                        arr[idx].title = newTitle;
+                        localStorage.setItem("vaani.chats", JSON.stringify(arr));
+                        window.dispatchEvent(
+                          new StorageEvent("storage", {
+                            key: "vaani.chats",
+                            newValue: JSON.stringify(arr),
+                          }),
+                        );
+                      }
+                    } catch {}
+                  }
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-muted-foreground hover:text-foreground"
+              >
+                <Edit3 className="h-3 w-3" />
+              </button>
             </div>
           </div>
           <p className="text-xs text-muted-foreground truncate pr-8">
