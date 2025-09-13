@@ -348,7 +348,7 @@ export default function LeftSidebar({
 
   return (
     <aside
-      className="w-80 border-r border-border bg-card h-screen flex flex-col"
+      className="w-96 border-r border-border bg-card h-screen flex flex-col"
       role="navigation"
       aria-label="Chat navigation"
     >
