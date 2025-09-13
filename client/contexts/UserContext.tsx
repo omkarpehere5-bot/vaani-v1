@@ -270,8 +270,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const startVoiceListening = () => {
     if (speechRecognition && !isListening) {
       setIsListening(true);
-      speechRecognition.start();
+      try {
+        speechRecognition.start();
+      } catch (e) {
+        // recognition may already be running; that's fine
+      }
       speak("Voice commands activated. I'm listening.");
+    } else if (speechRecognition && isListening) {
+      // already listening
     }
   };
 
