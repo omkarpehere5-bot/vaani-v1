@@ -479,7 +479,7 @@ export default function Chat() {
                 </div>
                 <div
                   className={cn(
-                    "mt-1 flex items-center gap-2 px-1",
+                    "mt-2 flex items-center gap-3 px-1",
                     m.type === "user" ? "justify-end" : "justify-start",
                   )}
                 >
