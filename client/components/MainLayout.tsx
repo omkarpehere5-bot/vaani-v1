@@ -372,6 +372,9 @@ export default function MainLayout({
       ? (crypto as any).randomUUID()
       : Date.now().toString();
     localStorage.setItem("vaani.sessionId", newSession);
+    try {
+      window.dispatchEvent(new StorageEvent("storage", { key: "vaani.sessionId", newValue: newSession }));
+    } catch {}
     setActiveChat(newSession);
     setMessages([]);
     navigate("/chat");
