@@ -397,7 +397,16 @@ export default function MainLayout({
   }, []);
 
   const handleToggleSidebar = useCallback(() => {
-    setSidebarVisible(!sidebarVisible);
+    const next = !sidebarVisible;
+    setSidebarVisible(next);
+    try {
+      localStorage.setItem("vaani.ui.sidebar.visible", next ? "true" : "false");
+      window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.sidebar.visible", newValue: next ? "true" : "false" }));
+      if (next) {
+        localStorage.setItem("vaani.ui.history.visible", "false");
+        window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.history.visible", newValue: "false" }));
+      }
+    } catch {}
   }, [sidebarVisible]);
 
   const handleSettingsOpen = useCallback(() => {
