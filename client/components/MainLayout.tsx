@@ -67,7 +67,10 @@ export default function MainLayout({
   const [micLocked, setMicLocked] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(() => {
+    const v = localStorage.getItem("vaani.ui.sidebar.visible");
+    return v !== "false";
+  });
   const [micEnabled, setMicEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [captionsVisible, setCaptionsVisible] = useState(false);
