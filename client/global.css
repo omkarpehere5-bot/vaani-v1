@@ -1,0 +1,691 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  /* Light Theme - Professional Blue Gradient */
+  :root {
+    --background: 220 100% 98%;
+    --foreground: 222 84% 4.9%;
+
+    --card: 220 100% 97%;
+    --card-foreground: 222 84% 4.9%;
+
+    --popover: 220 100% 97%;
+    --popover-foreground: 222 84% 4.9%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 214 100% 96%;
+    --secondary-foreground: 220 9% 46%;
+
+    --muted: 214 100% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 100% 92%;
+    --input: 214 100% 94%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 218 100% 96%;
+    --sidebar-foreground: 222 84% 4.9%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 214 100% 94%;
+    --sidebar-accent-foreground: 222 84% 4.9%;
+    --sidebar-border: 214 100% 92%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  /* Dark Theme - Professional Blue Gradient */
+  .dark {
+    --background: 222 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 84% 5.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 84% 5.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 84% 4.9%;
+
+    --secondary: 217 32% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 32% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 222 84% 4.9%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 32% 17.5%;
+    --input: 217 32% 17.5%;
+    --ring: 216 34% 17%;
+
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 215 28% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 28% 17%;
+    --sidebar-ring: 216 34% 17%;
+  }
+
+  /* High Contrast Black/Yellow Theme */
+  .high-contrast-black-yellow {
+    --background: 60 100% 80%;
+    --foreground: 0 0% 0%;
+
+    --card: 60 100% 80%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 60 100% 80%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 0 0% 0%;
+    --primary-foreground: 60 100% 80%;
+
+    --secondary: 60 100% 70%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 60 100% 70%;
+    --muted-foreground: 0 0% 20%;
+
+    --accent: 0 0% 0%;
+    --accent-foreground: 60 100% 80%;
+
+    --destructive: 0 100% 30%;
+    --destructive-foreground: 60 100% 80%;
+
+    --border: 0 0% 0%;
+    --input: 60 100% 70%;
+    --ring: 0 0% 0%;
+
+    --focus-thickness: 4px;
+  }
+
+  /* High Contrast White/Black Theme */
+  .high-contrast-white-black {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 80%;
+
+    --accent: 200 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 100%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 100%;
+
+    --focus-thickness: 4px;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Color-Blind Safe Theme - Blue/Orange accents */
+  .color-blind-safe {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 6.7%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 6.7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 6.7%;
+
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 25 95% 53%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 100% 50%;
+
+    --focus-thickness: 3px;
+  }
+
+  /* Auto Theme - Matches OS preference */
+  .auto {
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .auto {
+      --background: 224 71% 4%;
+      --foreground: 213 31% 91%;
+      --card: 224 71% 4%;
+      --card-foreground: 213 31% 91%;
+      --popover: 224 71% 4%;
+      --popover-foreground: 213 31% 91%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 222 47% 11%;
+      --secondary: 215 28% 17%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 215 28% 17%;
+      --muted-foreground: 217 33% 64%;
+      --accent: 210 40% 98%;
+      --accent-foreground: 222 47% 11%;
+      --destructive: 0 63% 31%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 215 28% 17%;
+      --input: 215 28% 17%;
+      --ring: 216 34% 17%;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(0, 255, 200, 0.03) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .soft-bg-pattern {
+    background-image:
+      radial-gradient(circle at 25% 25%, rgba(142, 76, 36, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(142, 76, 36, 0.03) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(142, 76, 36, 0.01) 0%, transparent 50%);
+  }
+
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from { box-shadow: 0 0 20px rgba(142, 76, 36, 0.2); }
+    to { box-shadow: 0 0 30px rgba(142, 76, 36, 0.4); }
+  }
+
+  /* Accessibility Mode Specific Styles */
+
+  /* Low Vision Mode */
+  .low-vision-mode {
+    --base-font-size: 20px;
+    --focus-thickness: 4px;
+  }
+
+  .low-vision-mode * {
+    font-size: var(--base-font-size) !important;
+  }
+
+  .low-vision-mode button,
+  .low-vision-mode [role="button"] {
+    min-height: 56px;
+    min-width: 56px;
+    padding: 12px 16px;
+  }
+
+  /* Screen Reader Mode */
+  .screen-reader-mode {
+    --reduce-motion: 1;
+  }
+
+  .screen-reader-mode * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .screen-reader-mode .floating-animation,
+  .screen-reader-mode .pulse-glow {
+    animation: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-animation,
+    .animate-pulse,
+    .animate-ping {
+      animation: none !important;
+    }
+  }
+
+  /* Motor Friendly Mode */
+  .motor-friendly-mode button,
+  .motor-friendly-mode [role="button"],
+  .motor-friendly-mode input,
+  .motor-friendly-mode select {
+    min-height: 64px;
+    min-width: 64px;
+    padding: 16px 20px;
+  }
+
+  .motor-friendly-mode .focus\:ring-2:focus {
+    ring-width: 4px;
+  }
+
+  /* Big Controls - WCAG 2.2 AA minimum 44x44px, aiming for 48px */
+  .big-controls button,
+  .big-controls [role="button"] {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 18px;
+    padding: 12px 16px;
+  }
+
+  .big-controls input,
+  .big-controls textarea {
+    min-height: 48px;
+    font-size: 18px;
+    padding: 16px;
+  }
+
+  /* Large Target Sizes - Applied globally for accessibility */
+  .wcag-targets button,
+  .wcag-targets [role="button"],
+  .wcag-targets input[type="button"],
+  .wcag-targets input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 12px;
+  }
+
+  .wcag-targets input,
+  .wcag-targets textarea,
+  .wcag-targets select {
+    min-height: 44px;
+    padding: 12px;
+  }
+
+  /* Ensure adequate spacing between targets */
+  .wcag-targets button + button,
+  .wcag-targets [role="button"] + [role="button"] {
+    margin-left: 8px;
+  }
+
+  /* Focus indicators - Enhanced for WCAG compliance */
+  .wcag-targets *:focus,
+  .wcag-targets *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* High contrast focus for better visibility */
+  .high-contrast-black-yellow *:focus,
+  .high-contrast-white-black *:focus {
+    outline-width: 4px;
+    outline-offset: 3px;
+  }
+
+  /* Cognitive Lite Mode */
+  .cognitive-lite-mode {
+    --line-height: 1.8;
+  }
+
+  .cognitive-lite-mode * {
+    line-height: var(--line-height) !important;
+  }
+
+  /* Hearing Impaired Mode - Visual feedback enhancements */
+  .hearing-impaired-mode .pulse-glow {
+    animation: pulse-glow 1s ease-in-out infinite alternate;
+  }
+
+  /* Reduce Motion */
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Dyslexia Friendly Font */
+  .dyslexia-friendly * {
+    font-family: 'OpenDyslexic', 'Comic Sans MS', cursive !important;
+  }
+
+  /* Focus Styles */
+  .focus\:ring-2:focus {
+    outline: none;
+    ring-width: var(--focus-thickness, 2px);
+    ring-color: hsl(var(--ring));
+    ring-offset-width: 2px;
+    ring-offset-color: hsl(var(--background));
+  }
+
+  /* Color Blind Filters */
+  .deuteranopia-filter {
+    filter: url('#deuteranopia');
+  }
+
+  .protanopia-filter {
+    filter: url('#protanopia');
+  }
+
+  .tritanopia-filter {
+    filter: url('#tritanopia');
+  }
+
+  /* PTT (Push to Talk) Active State */
+  .ptt-active {
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.2) 0%, transparent 70%);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    animation: ptt-pulse 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes ptt-pulse {
+    from {
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+      transform: scale(1);
+    }
+    to {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      transform: scale(1.02);
+    }
+  }
+
+  /* Scan Mode Styles */
+  .scan-mode .scannable {
+    outline: 3px solid transparent;
+    transition: outline 0.2s ease;
+  }
+
+  .scan-mode .scannable.scan-highlight {
+    outline: 3px solid hsl(var(--primary));
+    background: hsla(var(--primary), 0.1);
+  }
+
+  /* Skip Links */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    z-index: 9999;
+  }
+
+  .skip-link:focus {
+    top: 6px;
+  }
+
+  /* Auth Form Animations */
+  @keyframes slide-in-left {
+    0% {
+      transform: translateX(-100px) scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-right {
+    0% {
+      transform: translateX(100px) scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.6s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.6s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  /* Faster Tooltips for better responsiveness */
+  [data-radix-tooltip-content] {
+    animation-duration: 150ms !important;
+  }
+
+  [data-radix-tooltip-trigger] {
+    --tooltip-delay: 200ms;
+  }
+
+  /* Professional Blue Gradient Backgrounds */
+  .blue-gradient-bg {
+    background: linear-gradient(135deg, hsl(220, 100%, 98%) 0%, hsl(214, 100%, 96%) 50%, hsl(210, 100%, 94%) 100%);
+  }
+
+  .dark .blue-gradient-bg {
+    background: linear-gradient(135deg, hsl(222, 84%, 4.9%) 0%, hsl(217, 32%, 17.5%) 50%, hsl(217, 32%, 15%) 100%);
+  }
+
+  .blue-gradient-card {
+    background: linear-gradient(135deg, hsl(220, 100%, 97%) 0%, hsl(214, 100%, 95%) 100%);
+    border: 1px solid hsl(214, 100%, 92%);
+  }
+
+  .dark .blue-gradient-card {
+    background: linear-gradient(135deg, hsl(222, 84%, 5.9%) 0%, hsl(217, 32%, 17.5%) 100%);
+    border: 1px solid hsl(217, 32%, 17.5%);
+  }
+
+  /* Enhanced App Structure */
+  body {
+    background: linear-gradient(180deg, hsl(220, 100%, 98%) 0%, hsl(214, 100%, 96%) 50%, hsl(210, 100%, 94%) 100%);
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background: linear-gradient(180deg, hsl(222, 84%, 4.9%) 0%, hsl(217, 32%, 17.5%) 50%, hsl(217, 32%, 15%) 100%);
+  }
+
+  /* Enhanced Glass Morphism */
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(214, 226, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  }
+
+  .dark .glass-morphism {
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Professional Button Styles */
+  .btn-blue-gradient {
+    background: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(217, 91%, 60%) 100%);
+    border: none;
+    color: hsl(210, 40%, 98%);
+    transition: all 0.3s ease;
+  }
+
+  .btn-blue-gradient:hover {
+    background: linear-gradient(135deg, hsl(221, 83%, 48%) 0%, hsl(217, 91%, 55%) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Enhanced Accessibility Modes */
+  .accessibility-mode-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(59, 130, 246, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style;
+    will-change: transform, box-shadow, border-color;
+  }
+
+  .accessibility-mode-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .accessibility-mode-card:hover .text-muted-foreground {
+    color: rgb(0, 0, 0) !important;
+  }
+
+  .dark .accessibility-mode-card {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+
+  .dark .accessibility-mode-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+  }
+
+  .dark .accessibility-mode-card:hover .text-muted-foreground {
+    color: rgb(255, 255, 255) !important;
+  }
+
+  /* Performance optimizations to prevent ResizeObserver loops */
+  [data-radix-dialog-content] {
+    contain: layout style;
+  }
+
+  [data-radix-scroll-area-content] {
+    contain: layout style;
+  }
+
+  /* Prevent layout thrashing in grid containers */
+  .grid {
+    contain: layout;
+  }
+
+  /* Optimize transitions to prevent excessive repaints */
+  .transition-all,
+  .transition-colors,
+  .transition-transform {
+    contain: layout style;
+  }
+}
