@@ -165,9 +165,9 @@ export default function LeftSidebar({
     return format(date, "MMM d");
   };
 
-  const renderChatItem = (chat: ChatItem) => (
+  const renderChatItem = (chat: ChatItem, idx: number) => (
     <div
-      key={chat.id}
+      key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
         "group flex items-center p-3 gap-3 rounded-lg cursor-pointer transition-colors mx-2",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
