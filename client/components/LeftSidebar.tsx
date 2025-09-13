@@ -103,7 +103,16 @@ export default function LeftSidebar({
       const raw = localStorage.getItem("vaani.chats");
       if (!raw) return [];
       const arr = JSON.parse(raw) as any[];
-      return arr.map((c) => ({ ...c, timestamp: new Date(c.timestamp) }));
+      return arr.map((c, i) => ({
+        id: c.id || `local-${i}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: c.title || "New Chat",
+        lastMessage: c.lastMessage || "",
+        timestamp: new Date(c.timestamp || Date.now()),
+        isPinned: !!c.isPinned,
+        isStarred: !!c.isStarred,
+        messageCount: c.messageCount || 0,
+        folder: c.folder,
+      }));
     } catch {
       return [];
     }
