@@ -375,7 +375,7 @@ export default function LeftSidebar({
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2">
-          {chats.map(renderChatItem)}
+          {chats.map((c, i) => renderChatItem(c, i))}
         </CollapsibleContent>
       </Collapsible>
     );
