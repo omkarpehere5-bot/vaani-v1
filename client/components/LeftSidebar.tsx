@@ -215,6 +215,32 @@ export default function LeftSidebar({
               >
                 <Edit3 className="h-3 w-3" />
               </button>
+
+              <button
+                aria-label="Delete chat"
+                title="Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!confirm('Delete this conversation?')) return;
+                  try {
+                    const raw = localStorage.getItem('vaani.chats');
+                    const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                    const idx = arr.findIndex((c: any) => c.id === chat.id);
+                    if (idx >= 0) {
+                      arr.splice(idx, 1);
+                      localStorage.setItem('vaani.chats', JSON.stringify(arr));
+                      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(arr) }));
+                    }
+                    // Also remove conversations
+                    localStorage.removeItem(`vaani.conversations.${chat.id}`);
+                    window.dispatchEvent(new StorageEvent('storage', { key: `vaani.conversations.${chat.id}`, newValue: null }));
+                  } catch {}
+                  onChatDelete(chat.id);
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
             </div>
           </div>
           <p className="text-xs text-muted-foreground truncate pr-8 max-w-full">
