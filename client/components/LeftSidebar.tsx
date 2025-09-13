@@ -217,7 +217,7 @@ export default function LeftSidebar({
               </button>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate pr-8">
+          <p className="text-xs text-muted-foreground truncate pr-8 max-w-full">
             {chat.lastMessage}
           </p>
           <div className="flex items-center justify-between mt-2">
