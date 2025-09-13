@@ -181,7 +181,7 @@ export default function LeftSidebar({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
-            <h4 className="text-sm font-medium text-foreground pr-2 break-words whitespace-normal leading-snug">
+            <h4 className="text-sm font-medium text-foreground pr-2 truncate max-w-[14rem]">
               {chat.title}
             </h4>
             <div className="flex items-center space-x-1 flex-shrink-0">
