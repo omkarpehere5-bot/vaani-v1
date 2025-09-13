@@ -138,15 +138,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         };
 
         recognition.onend = () => {
-          // Keep the background/wake recognizer running if user has alwaysListening enabled
-          if (user?.alwaysListening && isAuthenticated) {
-            try { recognition.start(); } catch {}
-          } else {
+          // Try to keep the wake/background recognizer running
+          try {
+            recognition.start();
+          } catch (e) {
+            console.warn('Could not restart recognition onend', e);
             setIsListening(false);
           }
         };
 
         setSpeechRecognition(recognition);
+
+        // Start background recognition to listen for wake words
+        try {
+          recognition.start();
+        } catch (e) {
+          // ignore startup errors (e.g., permission issues)
+        }
       }
     }
   }, []);
