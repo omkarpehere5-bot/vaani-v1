@@ -549,7 +549,7 @@ export default function Chat() {
                         }}
                         className="opacity-80 hover:opacity-100"
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         title="Copy query"
