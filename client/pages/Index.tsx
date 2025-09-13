@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import ConversationHistory from "@/components/ConversationHistory";
 import { api } from "@/utils/apiClient";
+import { useNavigate } from "react-router-dom";
 
 interface ConversationItem {
   id: string;
@@ -58,6 +59,7 @@ export default function Index() {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [autoSearchTimer, setAutoSearchTimer] = useState<NodeJS.Timeout | null>(
@@ -73,6 +75,7 @@ export default function Index() {
   const recognitionRef = useRef<any | null>(null);
   const stopRecognitionRef = useRef<any | null>(null);
   const wakeRecognitionRef = useRef<any | null>(null);
+  const navigate = useNavigate();
 
   // Initialize speech recognition
   useEffect(() => {
@@ -110,7 +113,7 @@ export default function Index() {
             handleProcessVoiceInput(transcript, conf);
             stopListening();
           }
-        }, 1500);
+        }, 1000);
         setAutoSearchTimer(timer);
       };
 
@@ -324,8 +327,13 @@ export default function Index() {
       utterance.pitch = 1.1;
       utterance.volume = 0.8;
       const voices = speechSynthesis.getVoices();
-      const match = voices.find((v) => v.lang === lang);
-      if (match) utterance.voice = match;
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || "").toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const byLang = voices.filter((v) => v.lang === lang);
+      const pick = byLang.find(femalePreferred) || voices.find(femalePreferred) || byLang[0] || voices[0];
+      if (pick) utterance.voice = pick;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -397,8 +405,9 @@ export default function Index() {
     playSuccessSound();
 
     try {
-      // Redirect to dedicated chat page
-      window.location.href = `/chat?q=${encodeURIComponent(query)}`;
+      setIsNavigating(true);
+      // Navigate to dedicated chat page
+      navigate(`/chat?q=${encodeURIComponent(query)}`);
     } finally {
       setIsProcessing(false);
     }
@@ -538,8 +547,26 @@ export default function Index() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "vaani.ui.history.visible") {
+        setShowHistory(e.newValue === "true");
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   return (
-    <div className="min-h-screen flex p-6 gap-6 blue-gradient-bg">
+    <div className="min-h-screen flex p-6 gap-6 blue-gradient-bg relative">
+      {(isProcessing || isNavigating) && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex items-center space-x-3 p-4 rounded-lg glass-morphism">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">Opening chat…</span>
+          </div>
+        </div>
+      )}
       {/* Main Interface */}
       <div
         className={cn(
@@ -665,7 +692,7 @@ export default function Index() {
                     <div className="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                     <span className="text-sm text-red-500 font-medium">
                       {query
-                        ? "Stop speaking for 2s to search automatically..."
+                        ? "Stop speaking for 1s to search automatically..."
                         : "Listening... Speak now"}
                     </span>
                     <Button
@@ -770,7 +797,16 @@ export default function Index() {
           {/* History Toggle Button */}
           <div className="flex justify-center mt-8">
             <Button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => {
+                const next = !showHistory;
+                setShowHistory(next);
+                try {
+                  localStorage.setItem("vaani.ui.history.visible", next ? "true" : "false");
+                  localStorage.setItem("vaani.ui.sidebar.visible", next ? "false" : "true");
+                  window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.history.visible", newValue: next ? "true" : "false" }));
+                  window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.sidebar.visible", newValue: next ? "false" : "true" }));
+                } catch {}
+              }}
               variant={showHistory ? "default" : "outline"}
               className={`glass-morphism h-12 px-6 text-base font-semibold transition-all duration-300 border-2 ${
                 showHistory
