@@ -505,7 +505,7 @@ export default function Chat() {
                         }}
                         className="opacity-80 hover:opacity-100"
                       >
-                        <ThumbsUp className="w-3.5 h-3.5" />
+                        <ThumbsUp className="w-4 h-4" />
                       </button>
                       <button
                         title="Dislike"
