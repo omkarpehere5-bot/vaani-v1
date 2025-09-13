@@ -184,9 +184,9 @@ export default function LeftSidebar({
             <h4 className="text-sm font-medium text-foreground pr-2 truncate max-w-[14rem]">
               {chat.title}
             </h4>
-            <div className="flex items-center space-x-1 flex-shrink-0">
-              {chat.isPinned && <Pin className="h-3 w-3 text-primary" />}
-              {chat.isStarred && <Star className="h-3 w-3 text-yellow-500" />}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              {chat.isPinned && <Pin className="h-4 w-4 text-primary" />}
+              {chat.isStarred && <Star className="h-4 w-4 text-yellow-500" />}
               <button
                 aria-label="Rename chat"
                 title="Rename"
