@@ -465,7 +465,7 @@ export default function LeftSidebar({
       {/* Chat List */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" style={{ contain: "layout style" }}>
-          <div className="px-3 py-4 space-y-3">
+          <div className="px-3 py-4 space-y-4">
             {renderChatGroup("Favorites", chatGroups.favorites, "favorites")}
             {renderChatGroup("Recent Chats", chatGroups.recent, "recent")}
           </div>
