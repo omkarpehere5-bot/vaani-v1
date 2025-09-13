@@ -535,7 +535,7 @@ export default function Chat() {
                         onClick={() => navigator.clipboard.writeText(m.content)}
                         className="opacity-80 hover:opacity-100"
                       >
-                        <CopyIcon className="w-3.5 h-3.5" />
+                        <CopyIcon className="w-4 h-4" />
                       </button>
                     </>
                   ) : (
@@ -557,7 +557,7 @@ export default function Chat() {
                         onClick={() => navigator.clipboard.writeText(m.content)}
                         className="opacity-80 hover:opacity-100"
                       >
-                        <CopyIcon className="w-3.5 h-3.5" />
+                        <CopyIcon className="w-4 h-4" />
                       </button>
                     </>
                   )}
