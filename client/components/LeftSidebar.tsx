@@ -246,7 +246,7 @@ export default function LeftSidebar({
           <p className="text-xs text-muted-foreground truncate pr-8 max-w-full">
             {chat.lastMessage}
           </p>
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-2 gap-2">
             <Badge variant="secondary" className="text-xs">
               {chat.messageCount} msgs
             </Badge>
