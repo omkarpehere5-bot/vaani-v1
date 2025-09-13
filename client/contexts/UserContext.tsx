@@ -284,7 +284,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const stopVoiceListening = () => {
     if (speechRecognition && isListening) {
       setIsListening(false);
-      speechRecognition.stop();
+      try { speechRecognition.stop(); } catch (e) {}
     }
   };
 
