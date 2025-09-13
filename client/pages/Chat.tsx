@@ -70,20 +70,45 @@ export default function Chat() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem(
-      `vaani.conversations.${sessionIdRef.current}`,
-    );
-    if (raw) {
-      try {
-        const arr = JSON.parse(raw) as any[];
-        setConversations(
-          arr.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
-        );
-      } catch {}
-    }
+    const loadForSession = (sessionId: string | null) => {
+      if (!sessionId) {
+        setConversations([]);
+        return;
+      }
+      const raw = localStorage.getItem(`vaani.conversations.${sessionId}`);
+      if (raw) {
+        try {
+          const arr = JSON.parse(raw) as any[];
+          setConversations(arr.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+          return;
+        } catch {}
+      }
+      setConversations([]);
+    };
+
+    // Initial load
+    loadForSession(sessionIdRef.current);
+
     if (initial) {
       handleSend(initial);
     }
+
+    // React to session change (e.g., New Chat)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "vaani.sessionId") {
+        const newId = e.newValue as string | null;
+        if (newId && newId !== sessionIdRef.current) {
+          sessionIdRef.current = newId as any;
+          loadForSession(newId);
+        } else if (!newId) {
+          sessionIdRef.current = (crypto as any).randomUUID ? (crypto as any).randomUUID() : String(Date.now());
+          loadForSession(sessionIdRef.current);
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => window.removeEventListener("storage", onStorage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
