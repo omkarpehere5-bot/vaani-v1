@@ -98,12 +98,38 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = false;
+        recognition.interimResults = true; // needed to detect wake word quickly
         recognition.lang = 'en-US';
 
+        const wakeRegex = /\b(?:hey|hi|ok|okay|yo)\s+(?:vaani|vani|vani\b|vaanee)\b/i;
+
         recognition.onresult = (event: any) => {
-          const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-          handleVoiceCommand(transcript);
+          // Build full transcript from results
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          const txt = transcript.toLowerCase().trim();
+
+          // If wake word detected and not currently in active listening mode, trigger start
+          if (!isListening && wakeRegex.test(txt)) {
+            try {
+              // Acknowledge and start active listening
+              startVoiceListening();
+              // Optionally give a short beep or speak
+              speak("Yes?");
+            } catch (e) {
+              console.warn('Failed to start listening on wake word', e);
+            }
+            return;
+          }
+
+          // Only process full commands when active listening is on and result is final
+          const last = event.results[event.results.length - 1];
+          if (isListening && last.isFinal) {
+            const finalTranscript = txt;
+            handleVoiceCommand(finalTranscript);
+          }
         };
 
         recognition.onerror = (event: any) => {
@@ -112,8 +138,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         };
 
         recognition.onend = () => {
+          // Keep the background/wake recognizer running if user has alwaysListening enabled
           if (user?.alwaysListening && isAuthenticated) {
-            recognition.start();
+            try { recognition.start(); } catch {}
           } else {
             setIsListening(false);
           }
