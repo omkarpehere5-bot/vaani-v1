@@ -173,6 +173,7 @@ export default function LeftSidebar({
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
+      style={{ width: '36px', alignSelf: 'center' }}
       onClick={() => onChatSelect(chat.id)}
       role="button"
       tabIndex={0}
