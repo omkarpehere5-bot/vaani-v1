@@ -133,7 +133,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         };
 
         recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
+          console.warn('Speech recognition error:', event.error);
+          // Handle transient errors (no-speech, audio-capture) by restarting the recognizer
+          if (event && event.error && (event.error === 'no-speech' || event.error === 'audio-capture')) {
+            // If user expects alwaysListening, try to restart promptly
+            setTimeout(() => {
+              try { recognition.start(); } catch (e) {}
+            }, 350);
+            return;
+          }
+          // For other errors, stop active listening gracefully
           setIsListening(false);
         };
 
