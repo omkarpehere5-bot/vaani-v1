@@ -280,7 +280,7 @@ export default function LeftSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              className="h-6 w-6 p-0 transition-opacity flex-shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-3 w-3" />
