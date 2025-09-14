@@ -169,11 +169,10 @@ export default function LeftSidebar({
     <div
       key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
-        "group flex items-center p-3 gap-3 rounded-lg cursor-pointer transition-colors mx-2",
+        "group flex items-center p-3 gap-3 rounded-lg cursor-pointer transition-colors mx-2 w-full pr-3",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
-      style={{ width: '36px', alignSelf: 'center' }}
       onClick={() => onChatSelect(chat.id)}
       role="button"
       tabIndex={0}
