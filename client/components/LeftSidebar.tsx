@@ -287,7 +287,20 @@ export default function LeftSidebar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onChatPin(chat.id)}>
+            <DropdownMenuItem onClick={() => {
+                try {
+                  const raw = localStorage.getItem("vaani.chats");
+                  const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                  const idx = arr.findIndex((c: any) => c.id === chat.id);
+                  if (idx >= 0) {
+                    arr[idx].isPinned = !arr[idx].isPinned;
+                    localStorage.setItem("vaani.chats", JSON.stringify(arr));
+                    window.dispatchEvent(new StorageEvent("storage", { key: "vaani.chats", newValue: JSON.stringify(arr) }));
+                    setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                  }
+                } catch (err) { console.error(err); }
+                onChatPin(chat.id);
+              }}>
               <Pin className="mr-2 h-4 w-4" />
               {chat.isPinned ? "Unpin" : "Pin"}
             </DropdownMenuItem>
@@ -300,14 +313,10 @@ export default function LeftSidebar({
                   if (idx >= 0) {
                     arr[idx].isStarred = !arr[idx].isStarred;
                     localStorage.setItem("vaani.chats", JSON.stringify(arr));
-                    window.dispatchEvent(
-                      new StorageEvent("storage", {
-                        key: "vaani.chats",
-                        newValue: JSON.stringify(arr),
-                      }),
-                    );
+                    window.dispatchEvent(new StorageEvent("storage", { key: "vaani.chats", newValue: JSON.stringify(arr) }));
+                    setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
                   }
-                } catch {}
+                } catch (err) { console.error(err); }
                 onChatStar(chat.id);
               }}
             >
