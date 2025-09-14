@@ -377,20 +377,23 @@ export default function LeftSidebar({
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between p-2 h-auto font-medium text-sm mx-1"
+            className="w-full justify-between p-2 h-11 font-medium text-sm mx-1"
+            style={{ minWidth: 0 }}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 min-w-0">
               {key === "favorites" && (
-                <Star className="h-4 w-4 text-yellow-500" />
+                <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
               )}
-              {key === "recent" && <MessageSquare className="h-4 w-4" />}
-              {title} ({chats.length})
+              {key === "recent" && <MessageSquare className="h-4 w-4 flex-shrink-0" />}
+              <span className="truncate">{title} ({chats.length})</span>
             </span>
-            {foldersExpanded[key] ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <span className="flex-shrink-0">
+              {foldersExpanded[key] ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </span>
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2">
