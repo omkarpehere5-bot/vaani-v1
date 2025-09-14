@@ -358,7 +358,8 @@ export default function LeftSidebar({
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between p-2 h-auto font-medium text-sm mx-1"
+            className="justify-between p-2 h-auto font-medium text-sm mx-1"
+            style={{ width: '36%' }}
           >
             <span className="flex items-center gap-2">
               {key === "favorites" && (
