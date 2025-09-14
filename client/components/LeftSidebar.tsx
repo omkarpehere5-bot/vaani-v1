@@ -193,9 +193,10 @@ export default function LeftSidebar({
             <h4 className="text-sm font-medium text-foreground pr-2 truncate max-w-[14rem]">
               {chat.title}
             </h4>
-            <div className="flex items-center space-x-2 flex-shrink-0">
+            <div className="flex items-center space-x-3 flex-shrink-0">
               {chat.isPinned && <Pin className="h-4 w-4 text-primary" />}
               {chat.isStarred && <Star className="h-4 w-4 text-yellow-500" />}
+
               <button
                 aria-label="Rename chat"
                 title="Rename"
@@ -216,13 +217,17 @@ export default function LeftSidebar({
                             newValue: JSON.stringify(arr),
                           }),
                         );
+                        // update local state
+                        setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
                       }
-                    } catch {}
+                    } catch (err) {
+                      console.error(err);
+                    }
                   }
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-muted-foreground hover:text-foreground"
+                className="ml-1 text-muted-foreground hover:text-foreground"
               >
-                <Edit3 className="h-3 w-3" />
+                <Edit3 className="h-4 w-4" />
               </button>
 
               <button
@@ -239,16 +244,21 @@ export default function LeftSidebar({
                       arr.splice(idx, 1);
                       localStorage.setItem('vaani.chats', JSON.stringify(arr));
                       window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(arr) }));
+                      // update local state immediately
+                      setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
                     }
                     // Also remove conversations
                     localStorage.removeItem(`vaani.conversations.${chat.id}`);
                     window.dispatchEvent(new StorageEvent('storage', { key: `vaani.conversations.${chat.id}`, newValue: null }));
-                  } catch {}
+                  } catch (err) {
+                    console.error(err);
+                  }
+                  // notify parent
                   onChatDelete(chat.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-destructive hover:text-destructive"
+                className="ml-1 text-destructive hover:text-destructive"
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </div>
           </div>
