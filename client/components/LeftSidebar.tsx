@@ -169,7 +169,7 @@ export default function LeftSidebar({
     <div
       key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
-        "group flex items-center p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 h-11",
+        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px]",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
@@ -183,14 +183,14 @@ export default function LeftSidebar({
       }}
       aria-label={`Chat: ${chat.title}, ${chat.messageCount} messages, last activity ${formatChatTime(chat.timestamp)}`}
     >
-      <div className="flex items-center space-x-3 w-full min-w-0">
+      <div className="flex items-start space-x-3 w-full min-w-0">
         <div className="flex-shrink-0">
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
-            <h4 className="text-sm font-medium text-foreground pr-2 truncate max-w-[14rem]">
+            <h4 className="text-sm font-medium text-foreground pr-2 truncate min-w-0 whitespace-nowrap overflow-hidden">
               {chat.title}
             </h4>
             <div className="flex items-center space-x-3 flex-shrink-0">
@@ -262,7 +262,7 @@ export default function LeftSidebar({
               </button>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate pr-8 max-w-full">
+          <p className="text-xs text-muted-foreground truncate pr-8 whitespace-nowrap overflow-hidden">
             {chat.lastMessage}
           </p>
           <div className="flex items-center justify-between mt-2 gap-2">
