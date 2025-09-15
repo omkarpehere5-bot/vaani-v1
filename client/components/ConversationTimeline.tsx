@@ -130,11 +130,18 @@ export default function ConversationTimeline({
       utterance.rate = settings.voiceSpeed;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-      
+      const rawLang = localStorage.getItem('vaani.settings.lang') || 'en-US';
+      utterance.lang = rawLang;
+      const voices = speechSynthesis.getVoices();
+      const short = rawLang.split('-')[0];
+      const byExact = voices.filter((v) => (v.lang || '').toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(short.toLowerCase()));
+      const pick = byExact[0] || byPrefix[0] || voices[0];
+      if (pick) utterance.voice = pick;
       utterance.onstart = () => setSpeakingMessageId(messageId);
       utterance.onend = () => setSpeakingMessageId(null);
       utterance.onerror = () => setSpeakingMessageId(null);
-      
+
       speechSynthesis.speak(utterance);
     }
   };
