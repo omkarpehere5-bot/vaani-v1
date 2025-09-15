@@ -163,7 +163,6 @@ export const handleChat: RequestHandler = async (req, res) => {
     }
 
     // Date intent short-circuit
-    const lastText = (finalMessages[finalMessages.length - 1]?.content || '').toLowerCase();
     const acceptLang = String(req.header('accept-language') || 'en-US');
     const today = new Date();
     const computeDateReply = (d: Date) => {
