@@ -406,7 +406,7 @@ export default function LeftSidebar({
                 <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
               )}
               {key === "recent" && <MessageSquare className="h-4 w-4 flex-shrink-0" />}
-              <span className="truncate">{title} ({chats.length})</span>
+              <span className="truncate min-w-0 whitespace-nowrap overflow-hidden">{title} ({chats.length})</span>
             </span>
             <span className="flex-shrink-0">
               {foldersExpanded[key] ? (
