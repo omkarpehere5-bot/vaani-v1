@@ -79,55 +79,59 @@ export default function Index() {
   const wakeRecognitionRef = useRef<any | null>(null);
   const navigate = useNavigate();
 
-  // Initialize speech recognition
-  useEffect(() => {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-      const lang = localStorage.getItem("vaani.settings.lang") || "en-US";
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = lang;
+  // Initialize speech recognition (if available) and provide on-demand creation
+  const ensureRecognition = () => {
+    if (recognitionRef.current) return;
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const lang = localStorage.getItem("vaani.settings.lang") || "en-US";
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = lang;
 
-      recognitionRef.current.onresult = (event) => {
-        const last = event.results[event.results.length - 1];
-        const transcript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      const transcript = Array.from(event.results)
+        .map((result) => result[0])
+        .map((result) => result.transcript)
+        .join("");
 
-        setQuery(transcript);
+      setQuery(transcript);
 
-        if (last && last.isFinal) {
-          if (transcript.trim()) {
-            handleProcessVoiceInput(transcript, last[0].confidence);
-            stopListening();
-          }
-          return;
+      if (last && last.isFinal) {
+        if (transcript.trim()) {
+          handleProcessVoiceInput(transcript, last[0].confidence);
+          stopListening();
         }
+        return;
+      }
 
-        if (autoSearchTimer) clearTimeout(autoSearchTimer);
-        const timer = setTimeout(() => {
-          if (transcript.trim()) {
-            const conf = last ? last[0].confidence : 0.8;
-            handleProcessVoiceInput(transcript, conf);
-            stopListening();
-          }
-        }, 1000);
-        setAutoSearchTimer(timer);
-      };
+      if (autoSearchTimer) clearTimeout(autoSearchTimer);
+      const timer = setTimeout(() => {
+        if (transcript.trim()) {
+          const conf = last ? last[0].confidence : 0.8;
+          handleProcessVoiceInput(transcript, conf);
+          stopListening();
+        }
+      }, 1000);
+      setAutoSearchTimer(timer);
+    };
 
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-        playErrorSound();
-      };
+    rec.onerror = () => {
+      setIsListening(false);
+      playErrorSound();
+    };
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
+    rec.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = rec;
+  };
+
+  useEffect(() => {
+    ensureRecognition();
   }, []);
 
   // Cleanup auto-search timer on unmount
