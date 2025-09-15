@@ -169,8 +169,14 @@ export const handleChat: RequestHandler = async (req, res) => {
     const computeDateReply = (d: Date) => {
       try {
         const fmtDate = new Intl.DateTimeFormat(acceptLang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+        const langPrefix = (acceptLang || 'en').toLowerCase();
+        if (langPrefix.startsWith('hi')) return `यह तारीख है ${fmtDate}`; // Hindi
+        if (langPrefix.startsWith('mr')) return `ही तारीख आहे ${fmtDate}`; // Marathi
         return `The date is ${fmtDate}`;
       } catch (e) {
+        const langPrefix = (acceptLang || 'en').toLowerCase();
+        if (langPrefix.startsWith('hi')) return `यह तारीख है ${d.toDateString()}`;
+        if (langPrefix.startsWith('mr')) return `ही तारीख आहे ${d.toDateString()}`;
         return `The date is ${d.toDateString()}`;
       }
     };
