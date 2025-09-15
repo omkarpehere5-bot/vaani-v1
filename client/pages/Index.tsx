@@ -55,6 +55,7 @@ export default function Index() {
     voiceCommands,
     getPersonalizedGreeting,
   } = useUser();
+  const { t } = useLanguage();
 
   const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
