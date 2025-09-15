@@ -174,13 +174,13 @@ export default function ConversationTimeline({
 
   const getMessageBgColor = (message: Message) => {
     if (message.type === 'user') {
-      return 'bg-primary/5 border-primary/20';
+      return 'bg-primary/10 border-primary/10'; // lighter blue for user's messages
     } else if (message.type === 'system') {
       return 'bg-yellow-500/5 border-yellow-500/20';
     } else if (message.isError) {
       return 'bg-red-500/5 border-red-500/20';
     } else {
-      return 'bg-secondary/30 border-border/50';
+      return 'bg-secondary/20 border-border/30'; // lighter assistant background
     }
   };
 
@@ -249,7 +249,7 @@ export default function ConversationTimeline({
           selectedMessage === message.id && "ring-2 ring-primary/50",
           settings.modes.screenReader && "focus-within:ring-2 focus-within:ring-primary"
         )}>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             {/* Message Status Indicators */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
