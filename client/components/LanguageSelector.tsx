@@ -27,9 +27,18 @@ export default function LanguageSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => applyLang('en')}>English</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => applyLang('hi')}>हिंदी</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => applyLang('mr')}>मराठी</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('en')} className={lang === 'en' ? 'font-semibold bg-secondary/10' : ''}>
+          English
+          {lang === 'en' && <span aria-hidden className="ml-2">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('hi')} className={lang === 'hi' ? 'font-semibold bg-secondary/10' : ''}>
+          हिंदी
+          {lang === 'hi' && <span aria-hidden className="ml-2">✓</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('mr')} className={lang === 'mr' ? 'font-semibold bg-secondary/10' : ''}>
+          मराठी
+          {lang === 'mr' && <span aria-hidden className="ml-2">✓</span>}
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => applyLang('es')}>Español</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
