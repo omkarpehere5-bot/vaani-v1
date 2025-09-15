@@ -39,7 +39,6 @@ export default function LanguageSelector() {
           मराठी
           {lang === 'mr' && <span aria-hidden className="ml-2">✓</span>}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => applyLang('es')}>Español</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
