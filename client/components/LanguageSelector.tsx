@@ -7,6 +7,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function LanguageSelector() {
   const { lang, setLang, t } = useLanguage();
 
+  const applyLang = (l: 'en' | 'hi' | 'mr' | 'es') => {
+    setLang(l);
+    try {
+      const map: Record<string, string> = { en: 'en-US', hi: 'hi-IN', mr: 'mr-IN', es: 'es-ES' };
+      const full = map[l] || 'en-US';
+      localStorage.setItem('vaani.settings.lang', full);
+      localStorage.setItem('vaani.ui.lang', l);
+      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.settings.lang', newValue: full }));
+      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.ui.lang', newValue: l }));
+    } catch {}
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -15,10 +27,10 @@ export default function LanguageSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setLang("en")}>English</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLang("hi")}>हिंदी</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLang("mr")}>मराठी</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLang("es")}>Español</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('en')}>English</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('hi')}>हिंदी</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('mr')}>मराठी</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyLang('es')}>Español</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
