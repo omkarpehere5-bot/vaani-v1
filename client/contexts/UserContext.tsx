@@ -172,6 +172,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         } catch (e) {
           // ignore startup errors (e.g., permission issues)
         }
+
+        return () => {
+          try { recognition.stop(); } catch {}
+          window.removeEventListener('storage', onStorageLang as any);
+        };
       }
     }
   }, []);
