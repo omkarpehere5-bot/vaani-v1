@@ -169,7 +169,7 @@ export default function LeftSidebar({
     <div
       key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
-        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px]",
+        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px] border-b border-border last:border-b-0",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
@@ -194,7 +194,28 @@ export default function LeftSidebar({
               {chat.title}
             </h4>
             <div className="flex items-center space-x-3 flex-shrink-0">
-              {chat.isPinned && <Pin className="h-4 w-4 text-primary" />}
+              <button
+                aria-label={chat.isPinned ? 'Unpin chat' : 'Pin chat'}
+                title={chat.isPinned ? 'Unpin' : 'Pin'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  try {
+                    const raw = localStorage.getItem('vaani.chats');
+                    const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                    const idx = arr.findIndex((c: any) => c.id === chat.id);
+                    if (idx >= 0) {
+                      arr[idx].isPinned = !arr[idx].isPinned;
+                      localStorage.setItem('vaani.chats', JSON.stringify(arr));
+                      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(arr) }));
+                      setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                    }
+                  } catch (err) { console.error(err); }
+                  onChatPin(chat.id);
+                }}
+                className="ml-1 text-muted-foreground hover:text-foreground"
+              >
+                <Pin className={`h-4 w-4 ${chat.isPinned ? 'text-primary' : 'text-muted-foreground'}`} />
+              </button>
               {chat.isStarred && <Star className="h-4 w-4 text-yellow-500" />}
 
               <button
@@ -275,7 +296,7 @@ export default function LeftSidebar({
           </div>
         </div>
 
-        <DropdownMenu>
+        <div className="flex-shrink-0 ml-2"><DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -360,7 +381,7 @@ export default function LeftSidebar({
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu></div>
       </div>
     </div>
   );
