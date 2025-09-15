@@ -409,12 +409,8 @@ export default function SettingsDialog({ open, onOpenChange, onCommandPalette }:
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="en-US">English (US)</SelectItem>
-                                <SelectItem value="en-GB">English (UK)</SelectItem>
                                 <SelectItem value="hi-IN">Hindi (India)</SelectItem>
                                 <SelectItem value="mr-IN">Marathi (India)</SelectItem>
-                                <SelectItem value="es-ES">Spanish (Spain)</SelectItem>
-                                <SelectItem value="fr-FR">French</SelectItem>
-                                <SelectItem value="de-DE">German</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
