@@ -394,7 +394,15 @@ export default function SettingsDialog({ open, onOpenChange, onCommandPalette }:
                             <Label>Language</Label>
                             <Select
                               defaultValue={localStorage.getItem('vaani.settings.lang') || 'en-US'}
-                              onValueChange={(val) => localStorage.setItem('vaani.settings.lang', val)}
+                              onValueChange={(val) => {
+                                localStorage.setItem('vaani.settings.lang', val);
+                                try {
+                                  const short = val.split('-')[0] || 'en';
+                                  localStorage.setItem('vaani.ui.lang', short);
+                                  // Attempt to notify other tabs
+                                  window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.ui.lang', newValue: short }));
+                                } catch {}
+                              }}
                             >
                               <SelectTrigger>
                                 <SelectValue />
