@@ -89,6 +89,7 @@ export default function Index() {
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = lang;
+    rec.onstart = () => setIsListening(true);
 
     rec.onresult = (event: any) => {
       const last = event.results[event.results.length - 1];
