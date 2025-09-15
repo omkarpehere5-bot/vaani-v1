@@ -581,9 +581,7 @@ export default function Chat() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={(() => {
-              try { const { t } = require('@/contexts/LanguageContext'); return t ? t('type_question') : 'Type your message...'; } catch { return 'Type your message...'; }
-            })()}
+            placeholder={t ? t('type_question') : 'Type your message...'}
             className="flex-1"
           />
           <Button
