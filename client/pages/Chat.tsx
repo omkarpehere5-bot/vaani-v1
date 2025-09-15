@@ -21,6 +21,7 @@ import {
   Copy as CopyIcon,
   Pencil,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConversationItem {
   id: string;
