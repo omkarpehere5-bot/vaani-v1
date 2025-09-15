@@ -615,7 +615,7 @@ export default function Index() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Type your question, use voice, or try 'Hey Vaani'..."
+                    placeholder={t("type_question") || "Type your question, use voice, or try 'Hey Vaani'..."}
                     className={`pr-20 border border-border/50 bg-secondary/30 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:outline-none text-foreground placeholder:text-muted-foreground font-medium rounded-lg ${
                       user?.useLargeText ? "text-base h-8" : "text-sm h-7"
                     } ${
