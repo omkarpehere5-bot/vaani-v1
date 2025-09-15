@@ -375,7 +375,9 @@ export default function Index() {
         .map((r: any) => r[0]?.transcript || "")
         .join("")
         .toLowerCase();
-      if (transcript.includes("stop")) {
+      // support stop words in English, Hindi, Marathi
+      const stopRegex = /\b(stop(?:\s+it)?|rukho|रुको|thamb|थांब|थांबो|थांब\b)\b/i;
+      if (stopRegex.test(transcript)) {
         cancelSpeaking();
         try {
           rec.stop();
