@@ -580,7 +580,9 @@ export default function Chat() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={localStorage.getItem('vaani.ui.lang') ? (localStorage.getItem('vaani.settings.lang') ? undefined : 'Type your message...') : 'Type your message...'}
+            placeholder={(() => {
+              try { const { t } = require('@/contexts/LanguageContext'); return t ? t('type_question') : 'Type your message...'; } catch { return 'Type your message...'; }
+            })()}
             className="flex-1"
           />
           <Button
