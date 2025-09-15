@@ -459,10 +459,22 @@ export default function Index() {
     if (isListening) {
       stopListening();
     } else {
-      setIsListening(true);
+      // Try to start recognizer and handle possible errors robustly
       setQuery("");
-      try { recognitionRef.current.start(); } catch (e) { console.warn(e); }
-      playSuccessSound();
+      try {
+        // Some browsers throw if recognition is already running; ensure state
+        try { recognitionRef.current.start(); } catch (startErr) {
+          console.warn('recognition start failed, attempting restart', startErr);
+          try { recognitionRef.current.stop(); } catch (e) {}
+          try { recognitionRef.current.start(); } catch (e) { console.error('start failed again', e); setIsListening(false); return; }
+        }
+        setIsListening(true);
+        playSuccessSound();
+      } catch (e) {
+        console.error('Failed to start recognition', e);
+        setIsListening(false);
+        playErrorSound();
+      }
     }
   };
 
