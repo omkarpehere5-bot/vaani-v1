@@ -101,6 +101,7 @@ export default function TopBar({
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const { settings, setMode } = useAccessibility();
   const { theme, setTheme } = useTheme();
+  const { t } = useLanguage();
 
   const getStatusColor = () => {
     switch (micStatus) {
