@@ -338,9 +338,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // In a real app, open calculator
     } else if (command.includes('read screen')) {
       readCurrentScreen();
-    } else if (command.includes('stop listening')) {
+    } else if (/(?:stop\s+listening|stop listening|stop it|rukho|रुको|thamb|थांब|थांबो)/i.test(command)) {
+      // Support multilingual stop commands
       stopVoiceListening();
-      speak("Voice commands deactivated");
+      stopSpeaking();
+      // Acknowledge in user's language if possible
+      const uiLang = localStorage.getItem('vaani.ui.lang') || 'en';
+      if (uiLang.startsWith('hi')) speak('ठीक है, रुक रहा हूँ');
+      else if (uiLang.startsWith('mr')) speak('ठीक आहे, थांबतो');
+      else speak('Stopped');
     } else if (command.includes('start listening')) {
       startVoiceListening();
     } else if (command.includes('what time')) {
