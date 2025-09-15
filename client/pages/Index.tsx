@@ -480,7 +480,7 @@ export default function Index() {
 
   const stopListening = () => {
     if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch (e) { try { recognitionRef.current.abort(); } catch (e2) {} }
       setIsListening(false);
     }
 
