@@ -7,10 +7,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function LanguageSelector() {
   const { lang, setLang, t } = useLanguage();
 
-  const applyLang = (l: 'en' | 'hi' | 'mr' | 'es') => {
+  const applyLang = (l: 'en' | 'hi' | 'mr') => {
     setLang(l);
     try {
-      const map: Record<string, string> = { en: 'en-US', hi: 'hi-IN', mr: 'mr-IN', es: 'es-ES' };
+      const map: Record<string, string> = { en: 'en-US', hi: 'hi-IN', mr: 'mr-IN' };
       const full = map[l] || 'en-US';
       localStorage.setItem('vaani.settings.lang', full);
       localStorage.setItem('vaani.ui.lang', l);
