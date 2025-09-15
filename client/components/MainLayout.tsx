@@ -629,6 +629,7 @@ export default function MainLayout({
 
   return (
     <AccessibilityProvider>
+      <LanguageProvider>
       <div className="min-h-screen bg-background text-foreground flex flex-col wcag-targets relative">
         {/* Animated Background */}
         <AnimatedBackground />
@@ -730,6 +731,7 @@ export default function MainLayout({
         <Toaster />
         <Sonner />
       </div>
+      </LanguageProvider>
     </AccessibilityProvider>
   );
 }
