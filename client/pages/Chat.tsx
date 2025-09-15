@@ -227,7 +227,8 @@ export default function Chat() {
         .map((r: any) => r[0]?.transcript || "")
         .join("")
         .toLowerCase();
-      if (transcript.includes("stop")) {
+      const stopRegex = /\b(stop(?:\s+it)?|rukho|रुको|thamb|थांब|थांबो|थांब\b)\b/i;
+      if (stopRegex.test(transcript)) {
         cancelSpeaking();
         try {
           rec.stop();
