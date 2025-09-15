@@ -51,6 +51,8 @@ interface SkillItem {
   category: string;
 }
 
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
 export default function MainLayout({
   children,
 }: {
