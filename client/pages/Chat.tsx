@@ -219,7 +219,7 @@ export default function Chat() {
     const rec = new SpeechRecognition();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.lang = "en-US";
+    rec.lang = localStorage.getItem("vaani.settings.lang") || "en-US";
     rec.onresult = (event: any) => {
       const transcript: string = Array.from(event.results)
         .map((r: any) => r[0]?.transcript || "")
