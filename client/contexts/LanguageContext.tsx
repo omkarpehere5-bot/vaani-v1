@@ -10,6 +10,7 @@ const translations: Record<Lang, Record<string, string>> = {
     calendar: "Calendar",
     language: "Language",
     save: "Save",
+    type_question: "Type your question, use voice, or try 'Hey Vaani'...",
   },
   hi: {
     connected: "कनेक्टेड",
@@ -18,6 +19,7 @@ const translations: Record<Lang, Record<string, string>> = {
     calendar: "कैलेंडर",
     language: "भाषा",
     save: "सहेजें",
+    type_question: "अपना प्रश्न टाइप करें, वॉइस का उपयोग करें, या 'हे वाणी' आज़माएं...",
   },
   mr: {
     connected: "कनेक्टेड",
@@ -26,6 +28,7 @@ const translations: Record<Lang, Record<string, string>> = {
     calendar: "कॅलेंडर",
     language: "भाषा",
     save: "जतन करा",
+    type_question: "आपला प्रश्न टाइप करा, आवाज वापरा, किंवा 'हे वाणी' प्रयत्न करा...",
   },
   es: {
     connected: "Conectado",
@@ -34,6 +37,7 @@ const translations: Record<Lang, Record<string, string>> = {
     calendar: "Calendario",
     language: "Idioma",
     save: "Guardar",
+    type_question: "Escribe tu pregunta, usa la voz o prueba 'Hola Vaani'...",
   },
 };
 
