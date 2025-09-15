@@ -54,6 +54,7 @@ export default function Chat() {
   }) as React.MutableRefObject<string>;
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const { t } = useLanguage();
   const [chatStarred, setChatStarred] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem("vaani.chats");
