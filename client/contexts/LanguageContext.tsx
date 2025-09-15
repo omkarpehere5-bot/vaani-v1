@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-type Lang = "en" | "hi" | "mr" | "es";
+type Lang = "en" | "hi" | "mr";
 
 const translations: Record<Lang, Record<string, string>> = {
   en: {
@@ -29,15 +29,6 @@ const translations: Record<Lang, Record<string, string>> = {
     language: "भाषा",
     save: "जतन करा",
     type_question: "आपला प्रश्न टाइप करा, आवाज वापरा, किंवा 'हे वाणी' प्रयत्न करा...",
-  },
-  es: {
-    connected: "Conectado",
-    offline: "Sin conexión",
-    settings: "Configuración",
-    calendar: "Calendario",
-    language: "Idioma",
-    save: "Guardar",
-    type_question: "Escribe tu pregunta, usa la voz o prueba 'Hola Vaani'...",
   },
 };
 
