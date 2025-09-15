@@ -331,8 +331,11 @@ export default function Index() {
         const n = (v.name || "").toLowerCase();
         return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
       };
-      const byLang = voices.filter((v) => v.lang === lang);
-      const pick = byLang.find(femalePreferred) || voices.find(femalePreferred) || byLang[0] || voices[0];
+      const rawLang = lang;
+      const short = rawLang.split('-')[0];
+      const byExact = voices.filter((v) => (v.lang || '').toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(short.toLowerCase()));
+      const pick = byExact.find(femalePreferred) || byPrefix.find(femalePreferred) || byExact[0] || byPrefix[0] || voices.find(femalePreferred) || voices[0];
       if (pick) utterance.voice = pick;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
