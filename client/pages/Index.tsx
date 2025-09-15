@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import ConversationHistory from "@/components/ConversationHistory";
 import { api } from "@/utils/apiClient";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConversationItem {
   id: string;
