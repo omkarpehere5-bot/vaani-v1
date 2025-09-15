@@ -265,7 +265,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         default: utterance.pitch = 1.0;
       }
       
-      utterance.lang = user.preferredLanguage || 'en-US';
+      const rawLang = (user && user.preferredLanguage) || localStorage.getItem('vaani.settings.lang') || 'en-US';
+      utterance.lang = rawLang;
+      const voices = speechSynthesis.getVoices();
+      const short = rawLang.split('-')[0];
+      const byExact = voices.filter((v) => (v.lang || '').toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(short.toLowerCase()));
+      // prefer female-like voices if available
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || '').toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const pick = byExact.find(femalePreferred) || byPrefix.find(femalePreferred) || byExact[0] || byPrefix[0] || voices.find(femalePreferred) || voices[0];
+      if (pick) utterance.voice = pick;
       speechSynthesis.speak(utterance);
     }
   };
