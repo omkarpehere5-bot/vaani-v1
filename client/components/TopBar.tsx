@@ -286,6 +286,12 @@ export default function TopBar({
           {/* Local Access Indicator */}
           <LocalAccessIndicator />
 
+          {/* Calendar */}
+          <CalendarDialog />
+
+          {/* Language selector */}
+          <LanguageSelector />
+
           {/* Settings */}
           <TooltipProvider delayDuration={200}>
             <Tooltip>
