@@ -234,7 +234,7 @@ export default function TopBar({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {isOnline ? "Connected" : "Offline"}
+                {isOnline ? t("connected") : t("offline")}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
