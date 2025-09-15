@@ -54,6 +54,9 @@ import LocalAccessIndicator from "./LocalAccessIndicator";
 import AuthForms from "./AuthForms";
 import ProfileSetup from "./ProfileSetup";
 import { useTheme } from "../hooks/use-theme";
+import LanguageSelector from "./LanguageSelector";
+import CalendarDialog from "./CalendarDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TopBarProps {
   micStatus: 'idle' | 'listening' | 'processing' | 'speaking';
