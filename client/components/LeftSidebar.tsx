@@ -103,7 +103,16 @@ export default function LeftSidebar({
       const raw = localStorage.getItem("vaani.chats");
       if (!raw) return [];
       const arr = JSON.parse(raw) as any[];
-      return arr.map((c) => ({ ...c, timestamp: new Date(c.timestamp) }));
+      return arr.map((c, i) => ({
+        id: c.id || `local-${i}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: c.title || "New Chat",
+        lastMessage: c.lastMessage || "",
+        timestamp: new Date(c.timestamp || Date.now()),
+        isPinned: !!c.isPinned,
+        isStarred: !!c.isStarred,
+        messageCount: c.messageCount || 0,
+        folder: c.folder,
+      }));
     } catch {
       return [];
     }
@@ -156,11 +165,11 @@ export default function LeftSidebar({
     return format(date, "MMM d");
   };
 
-  const renderChatItem = (chat: ChatItem) => (
+  const renderChatItem = (chat: ChatItem, idx: number) => (
     <div
-      key={chat.id}
+      key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
-        "group flex items-center p-2 rounded-lg cursor-pointer transition-colors mx-1",
+        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px] overflow-hidden box-border border-b border-border last:border-b-0",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
@@ -174,25 +183,110 @@ export default function LeftSidebar({
       }}
       aria-label={`Chat: ${chat.title}, ${chat.messageCount} messages, last activity ${formatChatTime(chat.timestamp)}`}
     >
-      <div className="flex items-center space-x-3 w-full min-w-0">
+      <div className="flex items-start space-x-3 w-full min-w-0">
         <div className="flex-shrink-0">
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
-            <h4 className="text-sm font-medium text-foreground truncate pr-2 max-w-[14rem]">
+            <h4 className="text-sm font-medium text-foreground pr-2 truncate min-w-0 whitespace-nowrap overflow-hidden">
               {chat.title}
             </h4>
-            <div className="flex items-center space-x-1 flex-shrink-0">
-              {chat.isPinned && <Pin className="h-3 w-3 text-primary" />}
-              {chat.isStarred && <Star className="h-3 w-3 text-yellow-500" />}
+            <div className="flex items-center space-x-3 flex-shrink-0">
+              <button
+                aria-label={chat.isPinned ? 'Unpin chat' : 'Pin chat'}
+                title={chat.isPinned ? 'Unpin' : 'Pin'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  try {
+                    const raw = localStorage.getItem('vaani.chats');
+                    const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                    const idx = arr.findIndex((c: any) => c.id === chat.id);
+                    if (idx >= 0) {
+                      arr[idx].isPinned = !arr[idx].isPinned;
+                      localStorage.setItem('vaani.chats', JSON.stringify(arr));
+                      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(arr) }));
+                      setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                    }
+                  } catch (err) { console.error(err); }
+                  onChatPin(chat.id);
+                }}
+                className="ml-1 text-muted-foreground hover:text-foreground"
+              >
+                <Pin className={`h-4 w-4 ${chat.isPinned ? 'text-primary' : 'text-muted-foreground'}`} />
+              </button>
+              {chat.isStarred && <Star className="h-4 w-4 text-yellow-500" />}
+
+              <button
+                aria-label="Rename chat"
+                title="Rename"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newTitle = prompt("Rename chat", chat.title)?.trim();
+                  if (newTitle) {
+                    try {
+                      const raw = localStorage.getItem("vaani.chats");
+                      const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                      const idx = arr.findIndex((c: any) => c.id === chat.id);
+                      if (idx >= 0) {
+                        arr[idx].title = newTitle;
+                        localStorage.setItem("vaani.chats", JSON.stringify(arr));
+                        window.dispatchEvent(
+                          new StorageEvent("storage", {
+                            key: "vaani.chats",
+                            newValue: JSON.stringify(arr),
+                          }),
+                        );
+                        // update local state
+                        setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }
+                }}
+                className="ml-1 text-muted-foreground hover:text-foreground"
+              >
+                <Edit3 className="h-4 w-4" />
+              </button>
+
+              <button
+                aria-label="Delete chat"
+                title="Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!confirm('Delete this conversation?')) return;
+                  try {
+                    const raw = localStorage.getItem('vaani.chats');
+                    const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                    const idx = arr.findIndex((c: any) => c.id === chat.id);
+                    if (idx >= 0) {
+                      arr.splice(idx, 1);
+                      localStorage.setItem('vaani.chats', JSON.stringify(arr));
+                      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(arr) }));
+                      // update local state immediately
+                      setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                    }
+                    // Also remove conversations
+                    localStorage.removeItem(`vaani.conversations.${chat.id}`);
+                    window.dispatchEvent(new StorageEvent('storage', { key: `vaani.conversations.${chat.id}`, newValue: null }));
+                  } catch (err) {
+                    console.error(err);
+                  }
+                  // notify parent
+                  onChatDelete(chat.id);
+                }}
+                className="ml-1 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate pr-8">
+          <p className="text-xs text-muted-foreground truncate pr-8 whitespace-nowrap overflow-hidden">
             {chat.lastMessage}
           </p>
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-2 gap-2">
             <Badge variant="secondary" className="text-xs">
               {chat.messageCount} msgs
             </Badge>
@@ -202,19 +296,32 @@ export default function LeftSidebar({
           </div>
         </div>
 
-        <DropdownMenu>
+        <div className="flex-shrink-0 ml-2 relative z-20"><DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              className="h-6 w-6 p-0 transition-opacity flex-shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onChatPin(chat.id)}>
+            <DropdownMenuItem onClick={() => {
+                try {
+                  const raw = localStorage.getItem("vaani.chats");
+                  const arr = raw ? (JSON.parse(raw) as any[]) : [];
+                  const idx = arr.findIndex((c: any) => c.id === chat.id);
+                  if (idx >= 0) {
+                    arr[idx].isPinned = !arr[idx].isPinned;
+                    localStorage.setItem("vaani.chats", JSON.stringify(arr));
+                    window.dispatchEvent(new StorageEvent("storage", { key: "vaani.chats", newValue: JSON.stringify(arr) }));
+                    setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
+                  }
+                } catch (err) { console.error(err); }
+                onChatPin(chat.id);
+              }}>
               <Pin className="mr-2 h-4 w-4" />
               {chat.isPinned ? "Unpin" : "Pin"}
             </DropdownMenuItem>
@@ -227,14 +334,10 @@ export default function LeftSidebar({
                   if (idx >= 0) {
                     arr[idx].isStarred = !arr[idx].isStarred;
                     localStorage.setItem("vaani.chats", JSON.stringify(arr));
-                    window.dispatchEvent(
-                      new StorageEvent("storage", {
-                        key: "vaani.chats",
-                        newValue: JSON.stringify(arr),
-                      }),
-                    );
+                    window.dispatchEvent(new StorageEvent("storage", { key: "vaani.chats", newValue: JSON.stringify(arr) }));
+                    setLocalChats(arr.map((c: any) => ({ ...c, timestamp: new Date(c.timestamp) })));
                   }
-                } catch {}
+                } catch (err) { console.error(err); }
                 onChatStar(chat.id);
               }}
             >
@@ -278,7 +381,7 @@ export default function LeftSidebar({
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu></div>
       </div>
     </div>
   );
@@ -295,24 +398,27 @@ export default function LeftSidebar({
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between p-2 h-auto font-medium text-sm mx-1"
+            className="w-full justify-between p-2 h-11 font-medium text-sm mx-1"
+            style={{ minWidth: 0 }}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 min-w-0">
               {key === "favorites" && (
-                <Star className="h-4 w-4 text-yellow-500" />
+                <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
               )}
-              {key === "recent" && <MessageSquare className="h-4 w-4" />}
-              {title} ({chats.length})
+              {key === "recent" && <MessageSquare className="h-4 w-4 flex-shrink-0" />}
+              <span className="truncate min-w-0 whitespace-nowrap overflow-hidden">{title} ({chats.length})</span>
             </span>
-            {foldersExpanded[key] ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <span className="flex-shrink-0">
+              {foldersExpanded[key] ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </span>
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-1">
-          {chats.map(renderChatItem)}
+        <CollapsibleContent className="space-y-2 min-w-0 overflow-hidden">
+          {chats.map((c, i) => renderChatItem(c, i))}
         </CollapsibleContent>
       </Collapsible>
     );
@@ -320,7 +426,7 @@ export default function LeftSidebar({
 
   return (
     <aside
-      className="w-80 border-r border-border bg-card h-screen flex flex-col"
+      className="w-96 max-w-full min-w-0 border-r border-border bg-card h-screen flex flex-col overflow-hidden"
       role="navigation"
       aria-label="Chat navigation"
     >
@@ -344,7 +450,7 @@ export default function LeftSidebar({
                   Chat
                 </span>
               </div>
-              <kbd className="px-2 py-1 bg-background border border-black/20 text-foreground rounded text-xs font-medium shadow-sm ml-auto">
+              <kbd className="px-2 py-1 bg-background border border-black/20 text-foreground rounded text-xs font-medium shadow-sm ml-3">
                 Alt+N
               </kbd>
             </Button>
@@ -410,8 +516,8 @@ export default function LeftSidebar({
 
       {/* Chat List */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" style={{ contain: "layout style" }}>
-          <div className="px-3 py-4 space-y-3">
+        <ScrollArea className="h-full overflow-auto" style={{ contain: "layout style" }}>
+          <div className="px-3 py-4 space-y-4 min-w-0 overflow-hidden">
             {renderChatGroup("Favorites", chatGroups.favorites, "favorites")}
             {renderChatGroup("Recent Chats", chatGroups.recent, "recent")}
           </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,6 +43,32 @@ export default function ConversationHistory({
   onSpeakMessage,
 }: ConversationHistoryProps) {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  useEffect(() => {
+    // Hide main sidebar while conversation history panel is open
+    let prev: string | null = null;
+    try {
+      prev = localStorage.getItem('vaani.ui.sidebar.visible');
+      localStorage.setItem('vaani.ui.sidebar.visible', 'false');
+      window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.ui.sidebar.visible', newValue: 'false' }));
+    } catch (e) {
+      // ignore
+    }
+
+    return () => {
+      try {
+        if (prev !== null) {
+          localStorage.setItem('vaani.ui.sidebar.visible', prev);
+          window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.ui.sidebar.visible', newValue: prev }));
+        } else {
+          localStorage.setItem('vaani.ui.sidebar.visible', 'true');
+          window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.ui.sidebar.visible', newValue: 'true' }));
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, []);
 
   const filteredConversations = showFavoritesOnly
     ? conversations.filter((conv) => conv.isFavorite)

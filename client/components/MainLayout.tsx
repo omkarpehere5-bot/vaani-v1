@@ -51,6 +51,8 @@ interface SkillItem {
   category: string;
 }
 
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
 export default function MainLayout({
   children,
 }: {
@@ -67,7 +69,10 @@ export default function MainLayout({
   const [micLocked, setMicLocked] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(() => {
+    const v = localStorage.getItem("vaani.ui.sidebar.visible");
+    return v !== "false";
+  });
   const [micEnabled, setMicEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [captionsVisible, setCaptionsVisible] = useState(false);
@@ -369,6 +374,9 @@ export default function MainLayout({
       ? (crypto as any).randomUUID()
       : Date.now().toString();
     localStorage.setItem("vaani.sessionId", newSession);
+    try {
+      window.dispatchEvent(new StorageEvent("storage", { key: "vaani.sessionId", newValue: newSession }));
+    } catch {}
     setActiveChat(newSession);
     setMessages([]);
     navigate("/chat");
@@ -394,7 +402,16 @@ export default function MainLayout({
   }, []);
 
   const handleToggleSidebar = useCallback(() => {
-    setSidebarVisible(!sidebarVisible);
+    const next = !sidebarVisible;
+    setSidebarVisible(next);
+    try {
+      localStorage.setItem("vaani.ui.sidebar.visible", next ? "true" : "false");
+      window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.sidebar.visible", newValue: next ? "true" : "false" }));
+      if (next) {
+        localStorage.setItem("vaani.ui.history.visible", "false");
+        window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.history.visible", newValue: "false" }));
+      }
+    } catch {}
   }, [sidebarVisible]);
 
   const handleSettingsOpen = useCallback(() => {
@@ -430,15 +447,42 @@ export default function MainLayout({
   );
 
   const handleChatDelete = useCallback((chatId: string) => {
-    console.log("Delete chat:", chatId);
-  }, []);
+    setChats((prev) => {
+      const next = prev.filter((c) => c.id !== chatId);
+      try {
+        localStorage.setItem('vaani.chats', JSON.stringify(next));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(next) }));
+        // remove conversations store
+        localStorage.removeItem(`vaani.conversations.${chatId}`);
+        window.dispatchEvent(new StorageEvent('storage', { key: `vaani.conversations.${chatId}`, newValue: null }));
+      } catch (e) {}
+      return next;
+    });
+
+    // If deleted chat was active, pick first or clear
+    setActiveChat((prev) => (prev === chatId ? (chats[0]?.id || '') : prev));
+  }, [chats]);
 
   const handleChatPin = useCallback((chatId: string) => {
-    console.log("Pin chat:", chatId);
+    setChats((prev) => {
+      const next = prev.map((c) => (c.id === chatId ? { ...c, isPinned: !c.isPinned } : c));
+      try {
+        localStorage.setItem('vaani.chats', JSON.stringify(next));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(next) }));
+      } catch (e) {}
+      return next;
+    });
   }, []);
 
   const handleChatStar = useCallback((chatId: string) => {
-    console.log("Star chat:", chatId);
+    setChats((prev) => {
+      const next = prev.map((c) => (c.id === chatId ? { ...c, isStarred: !c.isStarred } : c));
+      try {
+        localStorage.setItem('vaani.chats', JSON.stringify(next));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'vaani.chats', newValue: JSON.stringify(next) }));
+      } catch (e) {}
+      return next;
+    });
   }, []);
 
   const handleSkillToggle = useCallback((skillId: string) => {
@@ -585,6 +629,7 @@ export default function MainLayout({
 
   return (
     <AccessibilityProvider>
+      <LanguageProvider>
       <div className="min-h-screen bg-background text-foreground flex flex-col wcag-targets relative">
         {/* Animated Background */}
         <AnimatedBackground />
@@ -686,6 +731,7 @@ export default function MainLayout({
         <Toaster />
         <Sonner />
       </div>
+      </LanguageProvider>
     </AccessibilityProvider>
   );
 }

@@ -21,6 +21,7 @@ import {
   Copy as CopyIcon,
   Pencil,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConversationItem {
   id: string;
@@ -53,6 +54,7 @@ export default function Chat() {
   }) as React.MutableRefObject<string>;
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const { t } = useLanguage();
   const [chatStarred, setChatStarred] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem("vaani.chats");
@@ -70,20 +72,45 @@ export default function Chat() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem(
-      `vaani.conversations.${sessionIdRef.current}`,
-    );
-    if (raw) {
-      try {
-        const arr = JSON.parse(raw) as any[];
-        setConversations(
-          arr.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })),
-        );
-      } catch {}
-    }
+    const loadForSession = (sessionId: string | null) => {
+      if (!sessionId) {
+        setConversations([]);
+        return;
+      }
+      const raw = localStorage.getItem(`vaani.conversations.${sessionId}`);
+      if (raw) {
+        try {
+          const arr = JSON.parse(raw) as any[];
+          setConversations(arr.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+          return;
+        } catch {}
+      }
+      setConversations([]);
+    };
+
+    // Initial load
+    loadForSession(sessionIdRef.current);
+
     if (initial) {
       handleSend(initial);
     }
+
+    // React to session change (e.g., New Chat)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "vaani.sessionId") {
+        const newId = e.newValue as string | null;
+        if (newId && newId !== sessionIdRef.current) {
+          sessionIdRef.current = newId as any;
+          loadForSession(newId);
+        } else if (!newId) {
+          sessionIdRef.current = (crypto as any).randomUUID ? (crypto as any).randomUUID() : String(Date.now());
+          loadForSession(sessionIdRef.current);
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => window.removeEventListener("storage", onStorage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -153,8 +180,22 @@ export default function Chat() {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.95;
-      utterance.pitch = 1.05;
+      utterance.pitch = 1.1;
       utterance.volume = 0.85;
+      const voices = speechSynthesis.getVoices();
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || "").toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const rawLang = localStorage.getItem("vaani.settings.lang") || "en-US";
+      // set utterance lang (helps browsers pick a matching voice)
+      utterance.lang = rawLang;
+      const short = rawLang.split("-")[0];
+      // prefer exact lang match, then prefix match, then preferred gender
+      const byExact = voices.filter((v) => (v.lang || "").toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || "").toLowerCase().startsWith(short.toLowerCase()));
+      const pick = byExact.find(femalePreferred) || byPrefix.find(femalePreferred) || byExact[0] || byPrefix[0] || voices.find(femalePreferred) || voices[0];
+      if (pick) utterance.voice = pick;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -180,13 +221,14 @@ export default function Chat() {
     const rec = new SpeechRecognition();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.lang = "en-US";
+    rec.lang = localStorage.getItem("vaani.settings.lang") || "en-US";
     rec.onresult = (event: any) => {
       const transcript: string = Array.from(event.results)
         .map((r: any) => r[0]?.transcript || "")
         .join("")
         .toLowerCase();
-      if (transcript.includes("stop")) {
+      const stopRegex = /\b(stop(?:\s+it)?|rukho|रुको|thamb|थांब|थांबो|थांब\b)\b/i;
+      if (stopRegex.test(transcript)) {
         cancelSpeaking();
         try {
           rec.stop();
@@ -443,95 +485,91 @@ export default function Chat() {
                   )}
                 >
                   {m.content}
-                  <div
-                    className={cn(
-                      "mt-1 flex items-center gap-2",
-                      m.type === "user" ? "justify-end" : "justify-start",
-                    )}
-                  >
-                    {m.type === "assistant" ? (
-                      <>
-                        <button
-                          title="Like"
-                          aria-label="Like"
-                          onClick={() => {
-                            setConversations((prev) =>
-                              prev.map((x) =>
-                                x.id === m.id
-                                  ? {
-                                      ...x,
-                                      reactions: {
-                                        thumbsUp: !x.reactions?.thumbsUp,
-                                        thumbsDown: false,
-                                      },
-                                    }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Dislike"
-                          aria-label="Dislike"
-                          onClick={() => {
-                            setConversations((prev) =>
-                              prev.map((x) =>
-                                x.id === m.id
-                                  ? {
-                                      ...x,
-                                      reactions: {
-                                        thumbsDown: !x.reactions?.thumbsDown,
-                                        thumbsUp: false,
-                                      },
-                                    }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Copy response"
-                          aria-label="Copy response"
-                          onClick={() =>
-                            navigator.clipboard.writeText(m.content)
-                          }
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <CopyIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          title="Edit query"
-                          aria-label="Edit query"
-                          onClick={() => {
-                            setQuery(m.content);
-                            inputRef.current?.focus();
-                          }}
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Copy query"
-                          aria-label="Copy query"
-                          onClick={() =>
-                            navigator.clipboard.writeText(m.content)
-                          }
-                          className="opacity-80 hover:opacity-100"
-                        >
-                          <CopyIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                </div>
+                <div
+                  className={cn(
+                    "mt-2 flex items-center gap-3 px-1",
+                    m.type === "user" ? "justify-end" : "justify-start",
+                  )}
+                >
+                  {m.type === "assistant" ? (
+                    <>
+                      <button
+                        title="Like"
+                        aria-label="Like"
+                        onClick={() => {
+                          setConversations((prev) =>
+                            prev.map((x) =>
+                              x.id === m.id
+                                ? {
+                                    ...x,
+                                    reactions: {
+                                      thumbsUp: !x.reactions?.thumbsUp,
+                                      thumbsDown: false,
+                                    },
+                                  }
+                                : x,
+                            ),
+                          );
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <ThumbsUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        title="Dislike"
+                        aria-label="Dislike"
+                        onClick={() => {
+                          setConversations((prev) =>
+                            prev.map((x) =>
+                              x.id === m.id
+                                ? {
+                                    ...x,
+                                    reactions: {
+                                      thumbsDown: !x.reactions?.thumbsDown,
+                                      thumbsUp: false,
+                                    },
+                                  }
+                                : x,
+                            ),
+                          );
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <ThumbsDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        title="Copy response"
+                        aria-label="Copy response"
+                        onClick={() => navigator.clipboard.writeText(m.content)}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <CopyIcon className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        title="Edit query"
+                        aria-label="Edit query"
+                        onClick={() => {
+                          setQuery(m.content);
+                          inputRef.current?.focus();
+                        }}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        title="Copy query"
+                        aria-label="Copy query"
+                        onClick={() => navigator.clipboard.writeText(m.content)}
+                        className="opacity-80 hover:opacity-100"
+                      >
+                        <CopyIcon className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -544,7 +582,7 @@ export default function Chat() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            placeholder={t ? t('type_question') : 'Type your message...'}
             className="flex-1"
           />
           <Button

@@ -54,6 +54,8 @@ import LocalAccessIndicator from "./LocalAccessIndicator";
 import AuthForms from "./AuthForms";
 import ProfileSetup from "./ProfileSetup";
 import { useTheme } from "../hooks/use-theme";
+import LanguageSelector from "./LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TopBarProps {
   micStatus: 'idle' | 'listening' | 'processing' | 'speaking';
@@ -98,6 +100,7 @@ export default function TopBar({
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const { settings, setMode } = useAccessibility();
   const { theme, setTheme } = useTheme();
+  const { t } = useLanguage();
 
   const getStatusColor = () => {
     switch (micStatus) {
@@ -227,10 +230,29 @@ export default function TopBar({
                   ) : (
                     <WifiOff className="h-4 w-4 text-red-500" aria-label="Offline" />
                   )}
+                  {/* AI provider key missing indicator */}
+                  {(() => {
+                    const prov = (localStorage.getItem('vaani.ai.provider') || 'gemini').toLowerCase();
+                    const key = localStorage.getItem('vaani.ai.apiKey') || '';
+                    const requiresKey = ['gemini', 'openrouter', 'openai', 'bing'].includes(prov);
+                    if (requiresKey && !key) {
+                      return <span className="inline-block ml-1 h-2 w-2 rounded-full bg-red-500" aria-hidden />;
+                    }
+                    return null;
+                  })()}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {isOnline ? "Connected" : "Offline"}
+                {isOnline ? t("connected") : t("offline")}{' '}
+                {(() => {
+                  const prov = (localStorage.getItem('vaani.ai.provider') || 'gemini').toLowerCase();
+                  const key = localStorage.getItem('vaani.ai.apiKey') || '';
+                  const requiresKey = ['gemini', 'openrouter', 'openai', 'bing'].includes(prov);
+                  if (requiresKey && !key) {
+                    return ' — AI provider not configured. Open Settings to set API key.';
+                  }
+                  return '';
+                })()}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -282,6 +304,9 @@ export default function TopBar({
 
           {/* Local Access Indicator */}
           <LocalAccessIndicator />
+
+          {/* Language selector */}
+          <LanguageSelector />
 
           {/* Settings */}
           <TooltipProvider delayDuration={200}>

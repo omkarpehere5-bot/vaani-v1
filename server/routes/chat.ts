@@ -162,6 +162,36 @@ export const handleChat: RequestHandler = async (req, res) => {
       return res.json({ reply, session_id });
     }
 
+    // Date intent short-circuit
+    const acceptLang = String(req.header('accept-language') || 'en-US');
+    const today = new Date();
+    const computeDateReply = (d: Date) => {
+      try {
+        const fmtDate = new Intl.DateTimeFormat(acceptLang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+        const langPrefix = (acceptLang || 'en').toLowerCase();
+        if (langPrefix.startsWith('hi')) return `यह तारीख है ${fmtDate}`; // Hindi
+        if (langPrefix.startsWith('mr')) return `ही तारीख आहे ${fmtDate}`; // Marathi
+        return `The date is ${fmtDate}`;
+      } catch (e) {
+        const langPrefix = (acceptLang || 'en').toLowerCase();
+        if (langPrefix.startsWith('hi')) return `यह तारीख है ${d.toDateString()}`;
+        if (langPrefix.startsWith('mr')) return `ही तारीख आहे ${d.toDateString()}`;
+        return `The date is ${d.toDateString()}`;
+      }
+    };
+    if (/\b(?:what(?:'s| is)? the date|date of today|what date)\b/i.test(lastText) || /\btomorrow\b/i.test(lastText) || /\byesterday\b/i.test(lastText) || /day after tomorrow/i.test(lastText) || /in (\d+) days/i.test(lastText)) {
+      let target = new Date(today);
+      if (/\btomorrow\b/i.test(lastText)) target.setDate(today.getDate() + 1);
+      else if (/\byesterday\b/i.test(lastText)) target.setDate(today.getDate() - 1);
+      else if (/day after tomorrow/i.test(lastText)) target.setDate(today.getDate() + 2);
+      else {
+        const m = /in (\d+) days/i.exec(lastText);
+        if (m) target.setDate(today.getDate() + parseInt(m[1], 10));
+      }
+      const reply = computeDateReply(target);
+      return res.json({ reply, session_id });
+    }
+
     const providerHeader = String(req.header("x-provider") || "").toLowerCase();
     const provider = providerHeader || (process.env.DEFAULT_PROVIDER || "gemini");
 

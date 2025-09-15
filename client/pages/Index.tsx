@@ -26,6 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 import ConversationHistory from "@/components/ConversationHistory";
 import { api } from "@/utils/apiClient";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConversationItem {
   id: string;
@@ -53,11 +55,13 @@ export default function Index() {
     voiceCommands,
     getPersonalizedGreeting,
   } = useUser();
+  const { t } = useLanguage();
 
   const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [autoSearchTimer, setAutoSearchTimer] = useState<NodeJS.Timeout | null>(
@@ -73,56 +77,62 @@ export default function Index() {
   const recognitionRef = useRef<any | null>(null);
   const stopRecognitionRef = useRef<any | null>(null);
   const wakeRecognitionRef = useRef<any | null>(null);
+  const navigate = useNavigate();
 
-  // Initialize speech recognition
-  useEffect(() => {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-      const lang = localStorage.getItem("vaani.settings.lang") || "en-US";
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = lang;
+  // Initialize speech recognition (if available) and provide on-demand creation
+  const ensureRecognition = () => {
+    if (recognitionRef.current) return;
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const lang = localStorage.getItem("vaani.settings.lang") || "en-US";
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = lang;
+    rec.onstart = () => setIsListening(true);
 
-      recognitionRef.current.onresult = (event) => {
-        const last = event.results[event.results.length - 1];
-        const transcript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      const transcript = Array.from(event.results)
+        .map((result) => result[0])
+        .map((result) => result.transcript)
+        .join("");
 
-        setQuery(transcript);
+      setQuery(transcript);
 
-        if (last && last.isFinal) {
-          if (transcript.trim()) {
-            handleProcessVoiceInput(transcript, last[0].confidence);
-            stopListening();
-          }
-          return;
+      if (last && last.isFinal) {
+        if (transcript.trim()) {
+          handleProcessVoiceInput(transcript, last[0].confidence);
+          stopListening();
         }
+        return;
+      }
 
-        if (autoSearchTimer) clearTimeout(autoSearchTimer);
-        const timer = setTimeout(() => {
-          if (transcript.trim()) {
-            const conf = last ? last[0].confidence : 0.8;
-            handleProcessVoiceInput(transcript, conf);
-            stopListening();
-          }
-        }, 1500);
-        setAutoSearchTimer(timer);
-      };
+      if (autoSearchTimer) clearTimeout(autoSearchTimer);
+      const timer = setTimeout(() => {
+        if (transcript.trim()) {
+          const conf = last ? last[0].confidence : 0.8;
+          handleProcessVoiceInput(transcript, conf);
+          stopListening();
+        }
+      }, 1000);
+      setAutoSearchTimer(timer);
+    };
 
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-        playErrorSound();
-      };
+    rec.onerror = () => {
+      setIsListening(false);
+      playErrorSound();
+    };
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
+    rec.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = rec;
+  };
+
+  useEffect(() => {
+    ensureRecognition();
   }, []);
 
   // Cleanup auto-search timer on unmount
@@ -324,8 +334,16 @@ export default function Index() {
       utterance.pitch = 1.1;
       utterance.volume = 0.8;
       const voices = speechSynthesis.getVoices();
-      const match = voices.find((v) => v.lang === lang);
-      if (match) utterance.voice = match;
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || "").toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const rawLang = lang;
+      const short = rawLang.split('-')[0];
+      const byExact = voices.filter((v) => (v.lang || '').toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(short.toLowerCase()));
+      const pick = byExact.find(femalePreferred) || byPrefix.find(femalePreferred) || byExact[0] || byPrefix[0] || voices.find(femalePreferred) || voices[0];
+      if (pick) utterance.voice = pick;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -358,7 +376,9 @@ export default function Index() {
         .map((r: any) => r[0]?.transcript || "")
         .join("")
         .toLowerCase();
-      if (transcript.includes("stop")) {
+      // support stop words in English, Hindi, Marathi
+      const stopRegex = /\b(stop(?:\s+it)?|rukho|रुको|thamb|थांब|थांबो|थांब\b)\b/i;
+      if (stopRegex.test(transcript)) {
         cancelSpeaking();
         try {
           rec.stop();
@@ -397,8 +417,9 @@ export default function Index() {
     playSuccessSound();
 
     try {
-      // Redirect to dedicated chat page
-      window.location.href = `/chat?q=${encodeURIComponent(query)}`;
+      setIsNavigating(true);
+      // Navigate to dedicated chat page
+      navigate(`/chat?q=${encodeURIComponent(query)}`);
     } finally {
       setIsProcessing(false);
     }
@@ -422,6 +443,7 @@ export default function Index() {
   };
 
   const handleVoiceInput = () => {
+    ensureRecognition();
     if (!recognitionRef.current) {
       alert(
         "Speech recognition is not supported in your browser. Please use a modern browser like Chrome or Edge.",
@@ -429,19 +451,36 @@ export default function Index() {
       return;
     }
 
+    // ensure language is up-to-date
+    try {
+      recognitionRef.current.lang = localStorage.getItem('vaani.settings.lang') || 'en-US';
+    } catch {}
+
     if (isListening) {
       stopListening();
     } else {
-      setIsListening(true);
+      // Try to start recognizer and handle possible errors robustly
       setQuery("");
-      recognitionRef.current.start();
-      playSuccessSound();
+      try {
+        // Some browsers throw if recognition is already running; ensure state
+        try { recognitionRef.current.start(); } catch (startErr) {
+          console.warn('recognition start failed, attempting restart', startErr);
+          try { recognitionRef.current.stop(); } catch (e) {}
+          try { recognitionRef.current.start(); } catch (e) { console.error('start failed again', e); setIsListening(false); return; }
+        }
+        setIsListening(true);
+        playSuccessSound();
+      } catch (e) {
+        console.error('Failed to start recognition', e);
+        setIsListening(false);
+        playErrorSound();
+      }
     }
   };
 
   const stopListening = () => {
     if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch (e) { try { recognitionRef.current.abort(); } catch (e2) {} }
       setIsListening(false);
     }
 
@@ -538,8 +577,26 @@ export default function Index() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "vaani.ui.history.visible") {
+        setShowHistory(e.newValue === "true");
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   return (
-    <div className="min-h-screen flex p-6 gap-6 blue-gradient-bg">
+    <div className="min-h-screen flex p-6 gap-6 blue-gradient-bg relative">
+      {(isProcessing || isNavigating) && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex items-center space-x-3 p-4 rounded-lg glass-morphism">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">Opening chat…</span>
+          </div>
+        </div>
+      )}
       {/* Main Interface */}
       <div
         className={cn(
@@ -585,7 +642,7 @@ export default function Index() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Type your question, use voice, or try 'Hey Vaani'..."
+                    placeholder={t("type_question") || "Type your question, use voice, or try 'Hey Vaani'..."}
                     className={`pr-20 border border-border/50 bg-secondary/30 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:outline-none text-foreground placeholder:text-muted-foreground font-medium rounded-lg ${
                       user?.useLargeText ? "text-base h-8" : "text-sm h-7"
                     } ${
@@ -665,7 +722,7 @@ export default function Index() {
                     <div className="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                     <span className="text-sm text-red-500 font-medium">
                       {query
-                        ? "Stop speaking for 2s to search automatically..."
+                        ? "Stop speaking for 1s to search automatically..."
                         : "Listening... Speak now"}
                     </span>
                     <Button
@@ -770,7 +827,16 @@ export default function Index() {
           {/* History Toggle Button */}
           <div className="flex justify-center mt-8">
             <Button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => {
+                const next = !showHistory;
+                setShowHistory(next);
+                try {
+                  localStorage.setItem("vaani.ui.history.visible", next ? "true" : "false");
+                  localStorage.setItem("vaani.ui.sidebar.visible", next ? "false" : "true");
+                  window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.history.visible", newValue: next ? "true" : "false" }));
+                  window.dispatchEvent(new StorageEvent("storage", { key: "vaani.ui.sidebar.visible", newValue: next ? "false" : "true" }));
+                } catch {}
+              }}
               variant={showHistory ? "default" : "outline"}
               className={`glass-morphism h-12 px-6 text-base font-semibold transition-all duration-300 border-2 ${
                 showHistory

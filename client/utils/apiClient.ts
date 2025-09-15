@@ -102,6 +102,7 @@ export const api = {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "x-provider": provider,
+      "Accept-Language": localStorage.getItem('vaani.settings.lang') || 'en-US',
     };
     if (apiKey) headers["x-api-key"] = apiKey;
     try {
@@ -115,6 +116,10 @@ export const api = {
         try {
           return await chatDirectGemini(message, apiKey);
         } catch {}
+      }
+      // If provider requires an API key and none configured, return clear instruction
+      if ((provider === 'gemini' || provider === 'openrouter') && !apiKey) {
+        return { reply: "Online service unavailable: AI provider not configured. Open Settings and configure AI provider + API key." };
       }
       return {
         reply:
@@ -135,6 +140,7 @@ export const api = {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "x-provider": provider,
+      "Accept-Language": localStorage.getItem('vaani.settings.lang') || 'en-US',
     };
     if (apiKey) headers["x-api-key"] = apiKey;
     try {
@@ -144,6 +150,10 @@ export const api = {
         body: JSON.stringify({ messages }),
       });
     } catch {
+      // If provider requires API key and is not configured, return clear instruction
+      if ((provider === 'gemini' || provider === 'openrouter') && !apiKey) {
+        return { reply: "Online service unavailable: AI provider not configured. Open Settings and configure AI provider + API key." };
+      }
       return { reply: "I'm offline right now. Continuing locally." };
     }
   },

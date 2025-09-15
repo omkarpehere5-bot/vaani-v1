@@ -98,28 +98,85 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
+        recognition.interimResults = true; // needed to detect wake word quickly
+        recognition.lang = localStorage.getItem('vaani.settings.lang') || 'en-US';
+
+        const wakeRegex = /\b(?:hey|hi|ok|okay|yo)\s+(?:vaani|vani|vani\b|vaanee)\b/i;
+
+        // Update recognition.lang when user changes language in another tab
+        const onStorageLang = (e: StorageEvent) => {
+          if (e.key === 'vaani.settings.lang' && recognition) {
+            try { recognition.lang = (e.newValue as string) || localStorage.getItem('vaani.settings.lang') || 'en-US'; } catch {}
+          }
+        };
+        window.addEventListener('storage', onStorageLang);
 
         recognition.onresult = (event: any) => {
-          const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-          handleVoiceCommand(transcript);
+          // Build full transcript from results
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          const txt = transcript.toLowerCase().trim();
+
+          // If wake word detected and not currently in active listening mode, trigger start
+          if (!isListening && wakeRegex.test(txt)) {
+            try {
+              // Acknowledge and start active listening
+              startVoiceListening();
+              // Optionally give a short beep or speak
+              speak("Yes?");
+            } catch (e) {
+              console.warn('Failed to start listening on wake word', e);
+            }
+            return;
+          }
+
+          // Only process full commands when active listening is on and result is final
+          const last = event.results[event.results.length - 1];
+          if (isListening && last.isFinal) {
+            const finalTranscript = txt;
+            handleVoiceCommand(finalTranscript);
+          }
         };
 
         recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
+          console.warn('Speech recognition error:', event.error);
+          // Handle transient errors (no-speech, audio-capture) by restarting the recognizer
+          if (event && event.error && (event.error === 'no-speech' || event.error === 'audio-capture')) {
+            // If user expects alwaysListening, try to restart promptly
+            setTimeout(() => {
+              try { recognition.start(); } catch (e) {}
+            }, 350);
+            return;
+          }
+          // For other errors, stop active listening gracefully
           setIsListening(false);
         };
 
         recognition.onend = () => {
-          if (user?.alwaysListening && isAuthenticated) {
+          // Try to keep the wake/background recognizer running
+          try {
             recognition.start();
-          } else {
+          } catch (e) {
+            console.warn('Could not restart recognition onend', e);
             setIsListening(false);
           }
         };
 
         setSpeechRecognition(recognition);
+
+        // Start background recognition to listen for wake words
+        try {
+          recognition.start();
+        } catch (e) {
+          // ignore startup errors (e.g., permission issues)
+        }
+
+        return () => {
+          try { recognition.stop(); } catch {}
+          window.removeEventListener('storage', onStorageLang as any);
+        };
       }
     }
   }, []);
@@ -221,7 +278,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         default: utterance.pitch = 1.0;
       }
       
-      utterance.lang = user.preferredLanguage || 'en-US';
+      const rawLang = (user && user.preferredLanguage) || localStorage.getItem('vaani.settings.lang') || 'en-US';
+      utterance.lang = rawLang;
+      const voices = speechSynthesis.getVoices();
+      const short = rawLang.split('-')[0];
+      const byExact = voices.filter((v) => (v.lang || '').toLowerCase() === rawLang.toLowerCase());
+      const byPrefix = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(short.toLowerCase()));
+      // prefer female-like voices if available
+      const femalePreferred = (v: SpeechSynthesisVoice) => {
+        const n = (v.name || '').toLowerCase();
+        return /female|samantha|zira|sonia|aria|jenny|natasha|linda|susan|eva|sara|neural|woman/.test(n);
+      };
+      const pick = byExact.find(femalePreferred) || byPrefix.find(femalePreferred) || byExact[0] || byPrefix[0] || voices.find(femalePreferred) || voices[0];
+      if (pick) utterance.voice = pick;
       speechSynthesis.speak(utterance);
     }
   };
@@ -235,15 +304,21 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const startVoiceListening = () => {
     if (speechRecognition && !isListening) {
       setIsListening(true);
-      speechRecognition.start();
+      try {
+        speechRecognition.start();
+      } catch (e) {
+        // recognition may already be running; that's fine
+      }
       speak("Voice commands activated. I'm listening.");
+    } else if (speechRecognition && isListening) {
+      // already listening
     }
   };
 
   const stopVoiceListening = () => {
     if (speechRecognition && isListening) {
       setIsListening(false);
-      speechRecognition.stop();
+      try { speechRecognition.stop(); } catch (e) {}
     }
   };
 
@@ -263,9 +338,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // In a real app, open calculator
     } else if (command.includes('read screen')) {
       readCurrentScreen();
-    } else if (command.includes('stop listening')) {
+    } else if (/(?:stop\s+listening|stop listening|stop it|rukho|रुको|thamb|थांब|थांबो)/i.test(command)) {
+      // Support multilingual stop commands
       stopVoiceListening();
-      speak("Voice commands deactivated");
+      stopSpeaking();
+      // Acknowledge in user's language if possible
+      const uiLang = localStorage.getItem('vaani.ui.lang') || 'en';
+      if (uiLang.startsWith('hi')) speak('ठीक है, रुक रहा हूँ');
+      else if (uiLang.startsWith('mr')) speak('ठीक आहे, थांबतो');
+      else speak('Stopped');
     } else if (command.includes('start listening')) {
       startVoiceListening();
     } else if (command.includes('what time')) {
