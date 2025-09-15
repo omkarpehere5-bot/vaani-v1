@@ -55,7 +55,6 @@ import AuthForms from "./AuthForms";
 import ProfileSetup from "./ProfileSetup";
 import { useTheme } from "../hooks/use-theme";
 import LanguageSelector from "./LanguageSelector";
-import CalendarDialog from "./CalendarDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TopBarProps {
@@ -286,9 +285,6 @@ export default function TopBar({
 
           {/* Local Access Indicator */}
           <LocalAccessIndicator />
-
-          {/* Calendar */}
-          <CalendarDialog />
 
           {/* Language selector */}
           <LanguageSelector />
