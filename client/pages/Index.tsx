@@ -442,6 +442,7 @@ export default function Index() {
   };
 
   const handleVoiceInput = () => {
+    ensureRecognition();
     if (!recognitionRef.current) {
       alert(
         "Speech recognition is not supported in your browser. Please use a modern browser like Chrome or Edge.",
@@ -449,12 +450,17 @@ export default function Index() {
       return;
     }
 
+    // ensure language is up-to-date
+    try {
+      recognitionRef.current.lang = localStorage.getItem('vaani.settings.lang') || 'en-US';
+    } catch {}
+
     if (isListening) {
       stopListening();
     } else {
       setIsListening(true);
       setQuery("");
-      recognitionRef.current.start();
+      try { recognitionRef.current.start(); } catch (e) { console.warn(e); }
       playSuccessSound();
     }
   };
