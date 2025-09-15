@@ -99,9 +99,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true; // needed to detect wake word quickly
-        recognition.lang = 'en-US';
+        recognition.lang = localStorage.getItem('vaani.settings.lang') || 'en-US';
 
         const wakeRegex = /\b(?:hey|hi|ok|okay|yo)\s+(?:vaani|vani|vani\b|vaanee)\b/i;
+
+        // Update recognition.lang when user changes language in another tab
+        const onStorageLang = (e: StorageEvent) => {
+          if (e.key === 'vaani.settings.lang' && recognition) {
+            try { recognition.lang = (e.newValue as string) || localStorage.getItem('vaani.settings.lang') || 'en-US'; } catch {}
+          }
+        };
+        window.addEventListener('storage', onStorageLang);
 
         recognition.onresult = (event: any) => {
           // Build full transcript from results
