@@ -169,7 +169,7 @@ export default function LeftSidebar({
     <div
       key={chat.id || `chat-${idx}-${chat.timestamp?.valueOf?.() || Date.now()}`}
       className={cn(
-        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px] overflow-visible box-border border-b border-border last:border-b-0",
+        "group flex items-start p-2 gap-3 rounded-lg cursor-pointer transition-colors w-full pr-3 min-h-[44px] overflow-hidden box-border border-b border-border last:border-b-0",
         "hover:bg-secondary/80 focus:bg-secondary/80 focus:outline-none",
         activeChat === chat.id && "bg-secondary border border-primary/20",
       )}
@@ -417,7 +417,7 @@ export default function LeftSidebar({
             </span>
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2">
+        <CollapsibleContent className="space-y-2 min-w-0 overflow-hidden">
           {chats.map((c, i) => renderChatItem(c, i))}
         </CollapsibleContent>
       </Collapsible>
@@ -450,7 +450,7 @@ export default function LeftSidebar({
                   Chat
                 </span>
               </div>
-              <kbd className="px-2 py-1 bg-background border border-black/20 text-foreground rounded text-xs font-medium shadow-sm ml-auto">
+              <kbd className="px-2 py-1 bg-background border border-black/20 text-foreground rounded text-xs font-medium shadow-sm ml-3">
                 Alt+N
               </kbd>
             </Button>
@@ -517,7 +517,7 @@ export default function LeftSidebar({
       {/* Chat List */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full overflow-auto" style={{ contain: "layout style" }}>
-          <div className="px-3 py-4 space-y-4">
+          <div className="px-3 py-4 space-y-4 min-w-0 overflow-hidden">
             {renderChatGroup("Favorites", chatGroups.favorites, "favorites")}
             {renderChatGroup("Recent Chats", chatGroups.recent, "recent")}
           </div>
