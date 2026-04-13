@@ -688,4 +688,217 @@
   .transition-transform {
     contain: layout style;
   }
+
+  /* ====== FUTURISTIC NEON THEME ====== */
+  .theme-futuristic-neon {
+    --neon-cyan: #00f0ff;
+    --neon-blue: #0080ff;
+    --neon-purple: #b000ff;
+    --neon-pink: #ff006e;
+  }
+
+  .theme-futuristic-neon button:hover,
+  .theme-futuristic-neon [role="button"]:hover {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .theme-futuristic-neon .glow-enabled {
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
+  }
+
+  /* Animated background particles for futuristic mode */
+  .theme-futuristic-neon::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(176, 0, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* ====== MINIMAL DARK THEME ====== */
+  .theme-minimal-dark {
+    --bg-primary: #0a0e27;
+    --bg-secondary: #1a1f3a;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --border-color: #2d3748;
+  }
+
+  .theme-minimal-dark {
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
+  }
+
+  .theme-minimal-dark * {
+    transition-duration: 0.3s !important;
+  }
+
+  /* ====== HIGH CONTRAST THEME ====== */
+  .theme-high-contrast {
+    --hc-bg: #000000;
+    --hc-fg: #ffff00;
+    --hc-border: 4px solid #ffff00;
+  }
+
+  .theme-high-contrast {
+    background-color: #000000 !important;
+    color: #ffff00 !important;
+  }
+
+  .theme-high-contrast button,
+  .theme-high-contrast [role="button"] {
+    border: 4px solid #ffff00 !important;
+    background-color: #000000 !important;
+    color: #ffff00 !important;
+    font-weight: bold !important;
+    min-height: 56px !important;
+    min-width: 56px !important;
+  }
+
+  .theme-high-contrast button:hover,
+  .theme-high-contrast [role="button"]:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+
+  .theme-high-contrast button:focus,
+  .theme-high-contrast [role="button"]:focus {
+    outline: 6px solid #ffff00 !important;
+    outline-offset: 3px !important;
+  }
+
+  .theme-high-contrast input,
+  .theme-high-contrast textarea,
+  .theme-high-contrast select {
+    border: 4px solid #ffff00 !important;
+    background-color: #000000 !important;
+    color: #ffff00 !important;
+    font-weight: bold !important;
+  }
+
+  /* ====== USER MODE SPECIFIC STYLES ====== */
+
+  /* BLIND USER MODE */
+  .user-mode-blind {
+    --blind-bg: #000000;
+    --blind-focus: rgba(0, 240, 255, 0.8);
+  }
+
+  .user-mode-blind {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  .user-mode-blind button,
+  .user-mode-blind [role="button"] {
+    min-height: 72px !important;
+    min-width: 72px !important;
+    font-size: 18px !important;
+    padding: 20px !important;
+    margin: 10px auto !important;
+    display: block !important;
+    text-align: center !important;
+    border: 2px solid rgba(0, 240, 255, 0.5) !important;
+  }
+
+  .user-mode-blind button:focus,
+  .user-mode-blind [role="button"]:focus {
+    outline: 6px solid rgba(0, 240, 255, 0.8) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5) !important;
+  }
+
+  .user-mode-blind * {
+    animation: none !important;
+  }
+
+  /* LOW VISION MODE */
+  .user-mode-low-vision {
+    --lv-font-size: 24px;
+    --lv-line-height: 1.8;
+    --lv-focus: 6px;
+  }
+
+  .user-mode-low-vision * {
+    font-size: var(--lv-font-size) !important;
+    line-height: var(--lv-line-height) !important;
+  }
+
+  .user-mode-low-vision button,
+  .user-mode-low-vision [role="button"] {
+    min-height: 64px !important;
+    min-width: 64px !important;
+    padding: 16px 20px !important;
+    border: 3px solid currentColor !important;
+    font-weight: bold !important;
+  }
+
+  .user-mode-low-vision button:focus,
+  .user-mode-low-vision [role="button"]:focus {
+    outline: var(--lv-focus) solid currentColor !important;
+    outline-offset: 4px !important;
+  }
+
+  /* STANDARD MODE */
+  .user-mode-standard {
+    /* Standard mode uses all default animations */
+  }
+
+  /* Animation Control */
+  .animations-enabled * {
+    animation-duration: 0.3s;
+    transition-duration: 0.3s;
+  }
+
+  .reduce-motion *,
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Glow Effects Control */
+  .glow-enabled button:hover,
+  .glow-enabled [role="button"]:hover {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  .glow-enabled .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Voice Navigation Visual Feedback */
+  [data-voice-focused="true"] {
+    outline: 3px dashed rgba(0, 240, 255, 0.8) !important;
+    outline-offset: 2px !important;
+  }
+
+  .voice-command-active {
+    animation: pulse-glow 1s ease-in-out infinite;
+  }
+
+  @keyframes voice-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
+  }
+
+  .voice-listening {
+    animation: voice-pulse 0.6s ease-in-out infinite;
+  }
+
+  /* High contrast focus styles */
+  .theme-high-contrast *:focus-visible,
+  .user-mode-blind *:focus-visible,
+  .user-mode-low-vision *:focus-visible {
+    outline-width: 4px !important;
+    outline-offset: 3px !important;
+  }
 }
