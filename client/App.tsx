@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Chat from "./pages/Chat";
 import Onboarding from "./components/Onboarding";
+import ContextualUIBehavior from "./components/ContextualUIBehavior";
 import { suppressResizeObserverErrors } from "@/utils/resize-observer-fix";
 import { useState, useEffect } from "react";
 
@@ -41,16 +42,19 @@ const AppContent = () => {
   }
 
   return (
-    <BrowserRouter>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/chat" element={<Chat />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </MainLayout>
-    </BrowserRouter>
+    <>
+      <ContextualUIBehavior />
+      <BrowserRouter>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/chat" element={<Chat />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </MainLayout>
+      </BrowserRouter>
+    </>
   );
 };
 
